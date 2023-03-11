@@ -2,5 +2,34 @@
   "dependencies": {
     "mbr-pem": "^0.0.1",
     "mbr-queue": "^2.1.0"
-  }
+  },
+  "name": "mbr-acme",
+  "version": "0.0.1",
+  "description": "MadBrozzeR's ACME client implementation",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MadBrozzeR/acme.git"
+  },
+  "keywords": [
+    "acme",
+    "certificate",
+    "certificate request",
+    "csr",
+    "ca",
+    "let's encrypt"
+  ],
+  "author": "MadBrozzeR",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MadBrozzeR/acme/issues"
+  },
+  "homepage": "https://github.com/MadBrozzeR/acme#readme"
 }
