@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "mbr-pem": "^0.0.1",
+    "mbr-queue": "^2.1.0"
+  }
+}
