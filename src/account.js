@@ -73,9 +73,9 @@ Account.create = function (params) {
 Account.prototype.requestCertificateIssue = function (params) {
   const { domains, challengeType = CHALLENGE.HTTP1, csrFields, validation } = params;
 
-  const order = account.createOrder(domains);
+  const order = this.createOrder(domains);
 
-  order.getAllChallenges(challengeType)
+  return order.getAllChallenges(challengeType)
     .then(function (challenges) {
       return validation(challenges)
         .then(function () {
@@ -91,8 +91,8 @@ Account.prototype.requestCertificateIssue = function (params) {
             keys: order.keys ? {
               privateKey: order.keys.privateKey.toString(),
               publicKey: order.keys.publicKey.toString(),
-            },
-            certificate: certificate;
+            } : null,
+            certificate: certificate,
           };
         })
     });

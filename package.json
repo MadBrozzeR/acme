@@ -1,14 +1,14 @@
 {
-  "dependencies": {
-    "mbr-pem": "^0.0.1",
-    "mbr-queue": "^2.1.0"
-  },
   "name": "mbr-acme",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "MadBrozzeR's ACME client implementation",
   "main": "index.js",
   "directories": {
     "test": "test"
+  },
+  "dependencies": {
+    "mbr-pem": "^0.0.1",
+    "mbr-queue": "^2.1.0"
   },
   "devDependencies": {},
   "scripts": {
