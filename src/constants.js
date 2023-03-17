@@ -1,4 +1,4 @@
-module.exports.API = 'acme-v02.api.letsencrypt.org';
+module.exports.LETS_ENCRYPT_API = 'acme-v02.api.letsencrypt.org';
 
 module.exports.STATUS = {
   INVALID: 'invalid',

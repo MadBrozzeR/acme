@@ -11,7 +11,7 @@ function Account (options = {}) {
   this.options = options;
   this.privateKey;
   this.publicKey;
-  this.api = new ApiRequest();
+  this.api = new ApiRequest(options.api);
   this.orders = '';
 
   this.queue = new NetQueue();
@@ -58,8 +58,8 @@ Account.prototype.getThumbprint = function () {
   return this.thumb = getThumb(this.api.jwk);
 }
 
-Account.create = function (params) {
-  return new Account().create(params);
+Account.create = function (params, options) {
+  return new Account(options).create(params);
 }
 /**
  * Complete certificate issue request.

@@ -13,6 +13,7 @@ function base64url (buffer) {
 }
 
 function getIdentifiers (list) {
+  (list instanceof Array) || (list = [list]);
   const result = [];
 
   for (let index = 0 ; index < list.length ; ++index) {

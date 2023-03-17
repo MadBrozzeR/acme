@@ -1,5 +1,6 @@
 const https = require('https');
-const { API } = require('./constants.js');
+const http = require('http');
+const { LETS_ENCRYPT_API } = require('./constants.js');
 const { getJWS } = require('./crypting.js');
 const { getIdentifiers } = require('./utils.js');
 
@@ -33,7 +34,7 @@ Response.prototype.getHeader = function (name) {
   return this.raw.headers[name];
 }
 
-const URL_RE = /(https?):\/\/([^\/]+)(.*)/;
+const URL_RE = /^(https?:\/\/)?([^\/:]+)(?::(\d+))?(\/.*)?$/;
 
 function request (path, params = {}) {
   const requestParams = {
@@ -42,17 +43,22 @@ function request (path, params = {}) {
   };
 
   const urlMatch = URL_RE.exec(path);
+  let protocol;
 
   if (urlMatch) {
+    protocol = urlMatch[1] === 'http://' ? http : https;
     requestParams.hostname = urlMatch[2];
-    requestParams.path = urlMatch[3];
+    requestParams.port = urlMatch[3] ? parseInt(urlMatch[3], 10) : undefined;
+    requestParams.path = urlMatch[4];
   } else {
-    requestParams.hostname = API;
+    protocol = params.protocol === 'http' ? http : https;
+    requestParams.hostname = params.api || API;
     requestParams.path = path;
+    requestParams.port = params.port;
   }
 
   return new Promise(function (resolve, reject) {
-    const request = https.request(requestParams, function (response) {
+    const request = protocol.request(requestParams, function (response) {
       resolve(new Response(response));
     });
 
@@ -62,10 +68,21 @@ function request (path, params = {}) {
   });
 }
 
-function ApiRequest (key) {
-  this.key = key;
+function ApiRequest (api) {
+  this.key = null;
   this.jwk = null;
   this.kid = null;
+  this.directory = null;
+
+  const urlMatch = api && URL_RE.exec(api);
+
+  if (urlMatch) {
+    this.api = urlMatch[2];
+    this.protocol = urlMatch[1] === 'http://' ? 'http' : 'https';
+    this.port = urlMatch[3] ? parseInt(urlMatch[3], 10) : undefined;
+  } else {
+    this.api = LETS_ENCRYPT_API;
+  }
 }
 ApiRequest.prototype.setJWK = function (auth) {
   this.jwk = auth;
@@ -82,6 +99,16 @@ ApiRequest.prototype.setKey = function (key) {
 
   return this;
 }
+ApiRequest.prototype.getPath = function (path) {
+  if (path && path.substring(0,4) === 'http') {
+    return path;
+  }
+
+  return (this.protocol ? (this.protocol + '://') : 'https://') +
+    (this.api || LETS_ENCRYPT_API) +
+    (this.port ? (':' + this.port) : '') +
+    (path ? (path[0] === '/' ? path : ('/' + path)) : '');
+}
 
 ApiRequest.prototype.request = async function (path, body = '', { useJWK } = {}) {
   if (!this.key) {
@@ -96,14 +123,18 @@ ApiRequest.prototype.request = async function (path, body = '', { useJWK } = {})
     throw new Error('kid field is required');
   }
 
-  const nonce = await request('/acme/new-nonce', { method: 'HEAD' })
+  const directory = await this.getDirectory();
+
+  const nonce = await request(this.getPath(directory.newNonce), { method: 'HEAD' })
     .then(function (response) {
       return response.getHeader('replay-nonce');
     });
 
-  const url = path.substring(0, 4) === 'http'
-    ? path
-    : 'https://' + API + path;
+  if (path[0] === '$') {
+    path = directory[path.substring(1)];
+  }
+
+  const url = this.getPath(path);
 
   const head = {
     alg:'RS256',
@@ -118,7 +149,7 @@ ApiRequest.prototype.request = async function (path, body = '', { useJWK } = {})
 
   const jws = JSON.stringify(getJWS(head, body, this.key));
 
-  return request(path, {
+  return request(this.getPath(path), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/jose+json'
@@ -143,7 +174,7 @@ ApiRequest.prototype.accountRequest = function ({ email }) {
     }
   }
 
-  return this.request('/acme/new-acct', body, { useJWK: true });
+  return this.request('$newAccount', body, { useJWK: true });
 }
 
 ApiRequest.prototype.orderRequest = function (domains, { notBefore, notAfter } = {}) {
@@ -157,8 +188,21 @@ ApiRequest.prototype.orderRequest = function (domains, { notBefore, notAfter } =
     order.notAfter = notAfter.toJSON();
   }
 
-  return this.request('/acme/new-order', order);
+  return this.request('$newOrder', order);
 };
+ApiRequest.prototype.getDirectory = function () {
+  const api = this;
+  if (this.directory) {
+    return Promise.resolve(this.directory);
+  }
+  return request(this.getPath('/directory'))
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (response) {
+      return api.directory = response;
+    });
+}
 ApiRequest.prototype.validationRequest = function (url) {
   return this.request(url, {});
 };
@@ -170,7 +214,7 @@ ApiRequest.ResponseError.prototype.toString = function () {
 }
 
 module.exports.getTermsOfService = function getTermsOfService () {
-  return request('/directory')
+  return request(this.getPath('/directory'))
     .then(function (response) {
       return response.json();
     })
@@ -180,4 +224,3 @@ module.exports.getTermsOfService = function getTermsOfService () {
 }
 
 module.exports.ApiRequest = ApiRequest;
-module.exports.request = request;
