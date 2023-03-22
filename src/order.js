@@ -44,14 +44,17 @@ Order.prototype.getAllChallenges = function (type) {
   });
 }
 Order.prototype.validate = function (challenges, params = {}) {
-  this.account.queue.push(validationOperation, {
-    order: this,
-    challenges: challenges,
-    checkDelay: params.checkDelay || DEFAULT_VALIDATION_OPTIONS.checkDelay,
-    retries: params.retries || DEFAULT_VALIDATION_OPTIONS.retries,
+  const order = this;
+  return new Promise(function (resolve, reject) {
+    order.account.queue.push(validationOperation, {
+      order: order,
+      challenges: challenges,
+      checkDelay: params.checkDelay || DEFAULT_VALIDATION_OPTIONS.checkDelay,
+      retries: params.retries || DEFAULT_VALIDATION_OPTIONS.retries,
+      resolve: resolve,
+      reject: reject,
+    });
   });
-
-  return this;
 }
 Order.prototype.getInfo = function () {
   if (!this.id) {
@@ -80,11 +83,18 @@ Order.prototype.getStatus = function () {
       return info.data.status;
     });
 }
-Order.prototype.finalize = function (fields, { keyLength } = {}) {
-  this.account.queue.push(finalizeOperation, {
-    order: this,
-    fields: fields,
-    keyLength: keyLength,
+Order.prototype.finalize = function (fields, { keyLength, key } = {}) {
+  const order = this;
+
+  return new Promise(function (resolve, reject) {
+    order.account.queue.push(finalizeOperation, {
+      order: order,
+      fields: fields,
+      keyLength: keyLength,
+      key: key,
+      resolve: resolve,
+      reject: reject,
+    });
   });
 }
 Order.prototype.getCertificate = function () {

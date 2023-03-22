@@ -1,7 +1,7 @@
 const https = require('https');
 const http = require('http');
 const { LETS_ENCRYPT_API } = require('./constants.js');
-const { getJWS } = require('./crypting.js');
+const { getJWS, getJWSAuth } = require('./crypting.js');
 const { getIdentifiers } = require('./utils.js');
 
 function Response (response) {
@@ -68,21 +68,25 @@ function request (path, params = {}) {
   });
 }
 
-function ApiRequest (api) {
+function ApiRequest (api = LETS_ENCRYPT_API) {
   this.key = null;
   this.jwk = null;
   this.kid = null;
   this.directory = null;
+  this.api = LETS_ENCRYPT_API;
 
+  api && this.setAPI(api);
+}
+ApiRequest.prototype.setAPI = function (api) {
   const urlMatch = api && URL_RE.exec(api);
 
   if (urlMatch) {
     this.api = urlMatch[2];
     this.protocol = urlMatch[1] === 'http://' ? 'http' : 'https';
     this.port = urlMatch[3] ? parseInt(urlMatch[3], 10) : undefined;
-  } else {
-    this.api = LETS_ENCRYPT_API;
   }
+
+  return this;
 }
 ApiRequest.prototype.setJWK = function (auth) {
   this.jwk = auth;
@@ -96,6 +100,8 @@ ApiRequest.prototype.setKID = function (auth) {
 }
 ApiRequest.prototype.setKey = function (key) {
   this.key = key;
+
+  this.setJWK(getJWSAuth(key));
 
   return this;
 }
@@ -116,7 +122,7 @@ ApiRequest.prototype.request = async function (path, body = '', { useJWK } = {})
   }
 
   if (useJWK && !this.jwk) {
-    throw new Error('jwk is required');
+    this.setJWK(getJWSAuth(this.key));
   }
 
   if (!useJWK && !this.kid) {

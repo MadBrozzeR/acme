@@ -1,4 +1,5 @@
 const { useFile, parseResponse } = require("../utils.js");
+const { handleError } = require('./common.js');
 
 module.exports = {
   init: function () {
@@ -25,11 +26,7 @@ module.exports = {
         queue.trigger('error', error);
       });
   },
-  error: function (error) {
-    this.queue.clear();
-
-    throw error;
-  },
+  error: handleError,
   success: function (response) {
     const queue = this.queue;
 

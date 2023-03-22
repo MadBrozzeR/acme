@@ -1,32 +1,17 @@
 const { ApiRequest } = require('../src/api.js');
-const apiMocks = require('./mocks/common.js');
+const { mockData } = require('./mocks/index.js');
 const { privateKey } = require('./data.js');
-
-function mockData (request) {
-  switch (request.path) {
-    case '/directory':
-      return apiMocks.directory;
-    case '/new-nonce':
-      return apiMocks.nonce;
-    default:
-      return null;
-  }
-}
-
-function checkRequest(suit, request, params) {
-  const prefix = params.prefix ? ('[' + params.prefix + '] ') : '';
-  (params.method) && suit.equals(request.method, params.method, prefix + 'Method doesn\'t match');
-  (params.path) && suit.equals(request.path, params.path, prefix + 'Path doesn\'t match');
-}
+const { checkRequest } = require('./utils.js');
 
 function createApi (api = 'http://localhost:5084') {
   return new ApiRequest(api)
     .setKey(privateKey)
-    .setJWK({e: 'something', kty: 'RSA', n: 'modulus'})
     .setKID('http://localhost:5084/KID');
 }
 
 module.exports = {
+  skip: false,
+
   'should create ApiRequest module with proper attributes': function (resolve) {
     const { equals } = this.suit;
     const apiRequest = createApi();
@@ -90,9 +75,9 @@ module.exports = {
 
         const requestData = JSON.parse(requests[2].data);
 
-        equals(requestData.protected, 'eyJhbGciOiJSUzI1NiIsIm5vbmNlIjoiQTVGRU1qbElOaUhGODBxeHV5VUNNVFZaT0JnNmRmTTZzWHNkTTI2anNZeGxyc2siLCJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvcmFuZG9tLXJlcXVlc3QiLCJqd2siOnsiZSI6InNvbWV0aGluZyIsImt0eSI6IlJTQSIsIm4iOiJtb2R1bHVzIn19', 'Wrong protected field data');
+        equals(requestData.protected, 'eyJhbGciOiJSUzI1NiIsIm5vbmNlIjoiQTVGRU1qbElOaUhGODBxeHV5VUNNVFZaT0JnNmRmTTZzWHNkTTI2anNZeGxyc2siLCJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvcmFuZG9tLXJlcXVlc3QiLCJqd2siOnsiZSI6IkFRQUIiLCJuIjoiclZHSktEdjRUYXphM0lLMlBfcmNoZVQwWHlkUGpqNDhFN0tnSHl0X0xPMlJSWURfT0VDTmpOVTc0TWVYOXh4d0QzM281cGJuSEVQUFl0NWZZUHB5aVEiLCJrdHkiOiJSU0EifX0', 'Wrong protected field data');
         equals(requestData.payload, 'eyJkYXRhVG9TZW5kIjoidGVzdCJ9', 'Wrong payload field data');
-        equals(requestData.signature, 'qxgnmA8_2DyAfq11E3qGG_P9ap6DVInhBL65QdvyL7j2boaCbvUa9LWsadNoSQGfObq_10HdVwRJumdIzvaP1g', 'Wrong signature field data');
+        equals(requestData.signature, 'TTvzlXvfWVgOUfxdtenctcol64by2_EYFqEUYEtF3ChvX4MumT6ebiePODqV4TbQSU8DzPmSsRMstfBkr29tDw', 'Wrong signature field data');
 
         return apiRequest.request('http://localhost:5084/second-request');
       })
@@ -127,9 +112,9 @@ module.exports = {
 
         const requestData = JSON.parse(requests[2].data);
 
-        equals(requestData.protected, 'eyJhbGciOiJSUzI1NiIsIm5vbmNlIjoiQTVGRU1qbElOaUhGODBxeHV5VUNNVFZaT0JnNmRmTTZzWHNkTTI2anNZeGxyc2siLCJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvc3ViL25ldy1hY2N0IiwiandrIjp7ImUiOiJzb21ldGhpbmciLCJrdHkiOiJSU0EiLCJuIjoibW9kdWx1cyJ9fQ', 'Wrong protected field data');
+        equals(requestData.protected, 'eyJhbGciOiJSUzI1NiIsIm5vbmNlIjoiQTVGRU1qbElOaUhGODBxeHV5VUNNVFZaT0JnNmRmTTZzWHNkTTI2anNZeGxyc2siLCJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvc3ViL25ldy1hY2N0IiwiandrIjp7ImUiOiJBUUFCIiwibiI6InJWR0pLRHY0VGF6YTNJSzJQX3JjaGVUMFh5ZFBqajQ4RTdLZ0h5dF9MTzJSUllEX09FQ05qTlU3NE1lWDl4eHdEMzNvNXBibkhFUFBZdDVmWVBweWlRIiwia3R5IjoiUlNBIn19', 'Wrong protected field data');
         equals(requestData.payload, 'eyJ0ZXJtc09mU2VydmljZUFncmVlZCI6dHJ1ZSwiY29udGFjdCI6WyJtYWlsdG86c29tZW9uZUBleGFtcGxlLmNvbSJdfQ', 'Wrong payload field data');
-        equals(requestData.signature, 'dqscBV8Zobriug54HnEIPgT55N73Av2ZkmGfBtXO5fAZy3eZaC2KnfEPs4ysqlEEVp3swC3zjbljk5INCOrEEQ', 'Wrong signature field data');
+        equals(requestData.signature, 'ebRVgYDOAkZAZaYLsJSVZL-BkusrX82SJd0qznKE_5xiW5BskycwX7fNDYSHI-1w9LAm1LWef72Rlrtau82Yaw', 'Wrong signature field data');
       })
       .then(resolve)
       .catch(reject);

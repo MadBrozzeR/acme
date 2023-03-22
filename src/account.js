@@ -2,26 +2,43 @@ const { PEM } = require('mbr-pem');
 const { NetQueue } = require('mbr-queue');
 const { ApiRequest } = require('./api.js');
 const { CHALLENGE } = require('./constants.js');
-const { createKeyPair, getThumb } = require('./crypting.js');
+const { createKeyPair, getThumb, privateKeyToPEM } = require('./crypting.js');
 const createAccountOperation = require('./operations/create-account.js');
 const registerAccountOperation = require('./operations/register-account.js');
 const { Order } = require('./order.js');
 
-function Account (options = {}) {
-  this.options = options;
-  this.privateKey;
-  this.publicKey;
-  this.api = new ApiRequest(options.api);
-  this.orders = '';
+const queueHandlers = {
+  error: function (error) {
+    const account = this.data.account;
+    account.handlers.error && account.handlers.error.call(account, error);
+  },
+  end: function (data) {
+    const account = this.data.account;
+    account.handlers.success && account.handlers.success.call(account, data);
+  },
+}
 
-  this.queue = new NetQueue();
+function Account (options = {}) {
+  const account = this;
+  this.options;
+  this.privateKey;
+  this.api = new ApiRequest();
+  this.orders = '';
+  this.handlers = {};
+
+  this.queue = new NetQueue().on(queueHandlers);
   this.queue.data = {
     account: this
   }
+
+  this.setup(options);
 }
 
 Account.prototype.create = function (params) {
-  this.queue.push(createAccountOperation, params);
+  if (!this.privateKey) {
+    this.queue.push(createAccountOperation, params);
+  }
+
   this.queue.push(registerAccountOperation);
 
   return this;
@@ -40,10 +57,15 @@ Account.prototype.create = function (params) {
  * @param {string} [cache.certificate] - certificate received from CA;
  */
 Account.prototype.setup = function (options = {}) {
-  this.options = {
+  this.options = this.options ? {
     ...this.options,
     ...options,
-  };
+  } : options;
+
+  const key = options.key && privateKeyToPEM(options.key);
+
+  options.api && this.api.setAPI(options.api);
+  key && (this.privateKey = key) && this.api.setKey(key);
 
   return this;
 }
@@ -99,6 +121,15 @@ Account.prototype.requestCertificateIssue = function (params) {
 }
 Account.prototype.getCacheFiles = function () {
   return this.options.cache || {};
+}
+Account.prototype.on = function (listeners) {
+  for (const handler in listeners) {
+    if (listeners[handler] instanceof Function) {
+      this.handlers[handler] = listeners[handler];
+    }
+  }
+
+  return this;
 }
 
 module.exports = { Account };

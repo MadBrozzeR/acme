@@ -6,6 +6,7 @@ function createServer (port) {
       requests: [],
       listener: null,
       attach: function (listener) {
+        this.requests = [];
         this.listener = listener;
       },
       collect: function () {

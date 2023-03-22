@@ -1,5 +1,6 @@
 const { parseResponse, updateOrderFields } = require("../utils.js");
 const { STATUS } = require('../constants.js');
+const { handleError } = require('./common.js');
 
 module.exports = {
   init: function () {
@@ -73,13 +74,10 @@ module.exports = {
         queue.trigger('error', error);
       });
   },
-  error: function (error) {
-    this.queue.clear();
-
-    throw error;
-  },
+  error: handleError,
   success: function (response) {
     updateOrderFields(this.params.order, response);
+    this.params.resolve(response.data);
     this.queue.next();
   }
 }

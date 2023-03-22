@@ -29,20 +29,45 @@ function ssl(params, { onStderr, input } = {}) {
   });
 };
 
-const EXPONENT_RE = /Exponent: (\d+)/;
-const MODULUS_RE = /^Modulus=([A-F0-9]+)/;
+function privateKeyToPEM (key) {
+  const result = (key instanceof Buffer || typeof key === 'string') ? PEM.parse(key.toString())[0] : key;
 
-function getExponent (text) {
-  const number = parseInt(text, 10);
-  const buffer = Buffer.allocUnsafe(4);
-
-  buffer.writeUInt32BE(number);
-
-  for (let index = 0 ; index < buffer.length ; ++index) {
-    if (buffer[index] > 0) {
-      return base64url(buffer.subarray(index));
-    }
+  if (!(result instanceof PEM) || result.type !== PEM.TYPE.RSA_PRIVATE_KEY) {
+    throw new Error('Wrong type of key');
   }
+
+  return result;
+}
+
+function parsePrivateKey (key) {
+  const der = privateKeyToPEM(key).readDER();
+
+  const modulus = der.data[1].data[0] === 0 ? der.data[1].data.subarray(1) : der.data[1].data;
+
+  return {
+    modulus: modulus,
+    exponent: der.data[2].getRawData(),
+  };
+}
+
+module.exports.extractPublicKey = function (privateKey) {
+  const der = privateKeyToPEM(privateKey).readDER();
+  const modulus = der.data[1].raw;
+  const exponent = der.data[2].raw;
+  const keyData = Chunk.Sequence([
+    Chunk.read(modulus),
+    Chunk.read(exponent),
+  ]);
+
+  const publicKeyDer = Chunk.Sequence([
+    Chunk.Sequence([
+      Chunk.Object('1.2.840.113549.1.1.1'),
+      Chunk.Null,
+    ]),
+    Chunk.Bit(keyData.raw),
+  ]);
+
+  return new PEM(PEM.TYPE.PUBLIC_KEY, publicKeyDer.raw);
 }
 
 function genRSA (length = 4096) {
@@ -75,33 +100,14 @@ function createKeys(length = 4096) {
     });
 }
 
-module.exports.getJWSAuth = function getJWSAuth ({ publicKey }) {
-  if (publicKey instanceof PEM) {
-    publicKey = publicKey.toString();
-  }
+module.exports.getJWSAuth = function getJWSAuth (privateKey) {
+  const keyData = parsePrivateKey(privateKey);
 
-  return Promise.all([
-    ssl(['rsa', '-pubin', '-text', '-noout'], { input: publicKey }),
-    ssl(['rsa', '-pubin', '-modulus', '-noout'], { input: publicKey })
-  ]).then(function ([textOut, modulusOut]) {
-    const exponentMatch = EXPONENT_RE.exec(textOut);
-    const modulusMatch = MODULUS_RE.exec(modulusOut);
-
-    if (exponentMatch && modulusMatch) {
-      const exponent = getExponent(exponentMatch[1]);
-      const modulus = base64url(
-        Buffer.from(modulusMatch[1], 'hex')
-      );
-
-      return {
-        e: exponent,
-        kty: 'RSA',
-        n: modulus
-      };
-    } else {
-      return Promise.reject(new Error('Unmatched'));
-    }
-  });
+  return {
+    e: base64url(keyData.exponent),
+    n: base64url(keyData.modulus),
+    kty: 'RSA'
+  };
 }
 
 module.exports.getThumb = function getThumb (auth) {
@@ -216,6 +222,7 @@ module.exports.createKeyPair = function createKeyPair ({ file = '', keyLength = 
       return result;
     });
 }
-
+module.exports.parsePrivateKey = parsePrivateKey;
+module.exports.privateKeyToPEM = privateKeyToPEM;
 module.exports.createKeys = createKeys;
 module.exports.genRSA = genRSA;

@@ -1,5 +1,6 @@
 const { STATUS } = require('../constants.js');
 const { useFile } = require('../utils.js');
+const { handleError } = require('./common.js');
 
 module.exports = {
   init: function () {
@@ -59,10 +60,7 @@ module.exports = {
         queue.trigger('error', error);
       });
   },
-  error: function (error) {
-    this.params.reject(error);
-    this.queue.clear();
-  },
+  error: handleError,
   success: function (data) {
     this.params.resolve(data);
     this.queue.next();

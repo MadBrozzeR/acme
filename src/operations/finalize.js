@@ -1,7 +1,8 @@
 const { PEM } = require('mbr-pem');
-const { createKeyPair, getCSR } = require("../crypting.js");
+const { createKeyPair, getCSR, extractPublicKey, privateKeyToPEM } = require("../crypting.js");
 const { useFile, base64url, parseResponse, updateOrderFields } = require("../utils.js");
 const { STATUS } = require('../constants.js');
+const { handleError } = require('./common.js');
 
 module.exports = {
   init: function () {
@@ -30,17 +31,26 @@ module.exports = {
 
   },
   keys: function () {
-    const { order, keyLength } = this.params;
+    const { order, keyLength, key } = this.params;
     const file = order.account.getCacheFiles().keys;
     const queue = this.queue;
 
-    createKeyPair({ file, keyLength })
-      .then(function (keys) {
-        queue.trigger('csr', keys);
-      })
-      .catch(function (error) {
-        queue.trigger('error', error);
-      });
+    if (key) {
+      const keys = {
+        privateKey: privateKeyToPEM(key),
+      };
+      keys.publicKey = extractPublicKey(keys.privateKey);
+
+      queue.trigger('csr', keys);
+    } else {
+      createKeyPair({ file, keyLength })
+        .then(function (keys) {
+          queue.trigger('csr', keys);
+        })
+        .catch(function (error) {
+          queue.trigger('error', error);
+        });
+    }
   },
   csr: function (keys) {
     this.data.keys = keys;
@@ -87,13 +97,10 @@ module.exports = {
         queue.trigger('error', error);
       });
   },
-  error: function (error) {
-    this.queue.clear();
-
-    throw error;
-  },
+  error: handleError,
   success: function (response) {
     this.params.order.keys = this.data.keys;
+    this.params.resolve(this.params.order);
 
     this.queue.next();
   }

@@ -1,5 +1,6 @@
 const { useFile, parseResponse, updateOrderFields } = require("../utils.js");
 const { Identifier } = require('../identifier.js');
+const { handleError } = require('./common.js');
 
 module.exports = {
   init: function () {
@@ -44,11 +45,7 @@ module.exports = {
 
     this.queue.trigger('success', result);
   },
-  error: function (error) {
-    this.queue.clear();
-
-    throw error;
-  },
+  error: handleError,
   success: function (result) {
     const order = this.params.order;
 

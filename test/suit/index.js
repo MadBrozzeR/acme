@@ -59,7 +59,7 @@ const testSuit = {
         reject(message);
       }
     });
-  }
+  },
 };
 
 function out(data, error) {
@@ -96,10 +96,14 @@ TestSuit.prototype.test = function (tests, { description = '', spacer = '' } = {
     });
   } else {
     suit.tests.then(function () {
-      out(spacer + description + '\n');
+      out(spacer + description + ( tests.skip ? COLOR.YELLOW(' [SKIPPED]') : '' ) + '\n');
     });
 
-    for (const group in tests) {
+    if (!tests.skip) for (const group in tests) {
+      if (group === 'skip') {
+        continue;
+      }
+
       const test = tests[group];
 
       suit.test(tests[group], { description: group, spacer: spacer + '  ' })

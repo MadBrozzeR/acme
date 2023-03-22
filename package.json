@@ -7,8 +7,8 @@
     "test": "test"
   },
   "dependencies": {
-    "mbr-pem": "^0.0.1",
-    "mbr-queue": "^2.1.0"
+    "mbr-pem": "^0.0.3",
+    "mbr-queue": "^2.2.0"
   },
   "devDependencies": {},
   "scripts": {
