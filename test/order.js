@@ -5,7 +5,9 @@ const { getRequest, checkRequestData, checkRequest, checkFields } = require('./u
 
 function createOrder(domains = ['example.com', 'sub.example.com', 'sub1.example.com'], params) {
   return Account.create(undefined, { api: 'http://localhost:5084', key: privateKey })
-    .createOrder(domains, params);
+    .then(function (account) {
+      return account.createOrder(domains, params);
+    });
 }
 
 const CERTIFICATE = '-----BEGIN CERTIFICATE-----\naaaaaaaaaaaa\n-----END CERTIFICATE-----';
@@ -16,10 +18,8 @@ module.exports = {
 
     mocks.attach(mockData);
 
-    const order = createOrder('myexample.comp');
-    order.account.on({
-      error: reject,
-      success: function () {
+    createOrder('myexample.comp')
+      .then(function (order) {
         const request = getRequest(mocks.collect(), '/new-order');
 
         checkRequestData(suit, request, {
@@ -27,20 +27,17 @@ module.exports = {
           payload: 'eyJpZGVudGlmaWVycyI6W3sidHlwZSI6ImRucyIsInZhbHVlIjoibXlleGFtcGxlLmNvbXAifV19',
           signature: 'DL0RFvk1IEb32GaogbL1oGNrC6slEhvdsYnOLUh9DZsdnRRgax5-_TxGv3WpWoFwXrRkE6usxuHdoizjf8cKgQ',
         });
-
-        resolve();
-      }
-    });
+      })
+      .then(resolve)
+      .catch(reject);
   },
   'should create new order with multiple domains': function (resolve, reject) {
     const { data: { mocks }, suit } = this;
 
     mocks.attach(mockData);
 
-    const order = createOrder();
-    order.account.on({
-      error: reject,
-      success: function () {
+    createOrder()
+      .then(function () {
         const request = getRequest(mocks.collect(), '/new-order');
 
         checkRequestData(suit, request, {
@@ -48,41 +45,39 @@ module.exports = {
           payload: 'eyJpZGVudGlmaWVycyI6W3sidHlwZSI6ImRucyIsInZhbHVlIjoiZXhhbXBsZS5jb20ifSx7InR5cGUiOiJkbnMiLCJ2YWx1ZSI6InN1Yi5leGFtcGxlLmNvbSJ9LHsidHlwZSI6ImRucyIsInZhbHVlIjoic3ViMS5leGFtcGxlLmNvbSJ9XX0',
           signature: 'NxwHT7amcPJgdshtLFhG4QDLqlCAHLolw15aAINQaMSlPio7sOKlf2BYQdoInJxlYr--dCoiGJmqXp-UUHaLyw',
         });
-
-        resolve();
-      }
-    });
+      })
+      .then(resolve)
+      .catch(reject);
   },
   'should collect identifiers from order': function (resolve, reject) {
     const { data: { mocks }, suit } = this;
 
     mocks.attach(mockData);
 
-    const order = createOrder();
-    order.account.on({
-      error: reject,
-    });
-    order.getIdentifiers(function (identifiers) {
-      suit.equals('example.com' in identifiers, true, 'example.com identifier is missing');
-      suit.equals('sub.example.com' in identifiers, true, 'sub.example.com identifier is missing');
-      suit.equals(identifiers['example.com'].authorization, 'http://localhost:5084/authz/208626448057', 'Wrong authoriztion field');
-      suit.equals(identifiers['sub.example.com'].authorization, 'http://localhost:5084/authz/208626448067', 'Wrong authoriztion field');
-      suit.equals(identifiers['example.com'].name, 'example.com', 'Wrong name field');
-      suit.equals(identifiers['sub.example.com'].name, 'sub.example.com', 'Wrong name field');
-
-      resolve();
-    });
+    createOrder()
+      .then(function (order) {
+        return order.getIdentifiers();
+      })
+      .then(function (identifiers) {
+        suit.equals('example.com' in identifiers, true, 'example.com identifier is missing');
+        suit.equals('sub.example.com' in identifiers, true, 'sub.example.com identifier is missing');
+        suit.equals(identifiers['example.com'].authorization, 'http://localhost:5084/authz/208626448057', 'Wrong authoriztion field');
+        suit.equals(identifiers['sub.example.com'].authorization, 'http://localhost:5084/authz/208626448067', 'Wrong authoriztion field');
+        suit.equals(identifiers['example.com'].name, 'example.com', 'Wrong name field');
+        suit.equals(identifiers['sub.example.com'].name, 'sub.example.com', 'Wrong name field');
+      })
+      .then(resolve)
+      .catch(reject);
   },
   'should get all challenges': function (resolve, reject) {
     const { data: { mocks }, suit } = this;
 
     mocks.attach(mockData);
 
-    const order = createOrder();
-    order.account.on({
-      error: reject,
-    });
-    order.getAllChallenges()
+    const order = createOrder()
+      .then(function (order) {
+        return order.getAllChallenges();
+      })
       .then(function (result) {
         const requests = mocks.collect();
         checkRequest(suit, getRequest(requests, '/authz/208626448057'), { method: 'POST' });
@@ -117,9 +112,8 @@ module.exports = {
           key: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s.d7GAEzos3M9j4MWFo68aL9z-TiAOMtaGzr8YElpROTc',
           validationRecord: null
         });
-
-        resolve();
       })
+      .then(resolve)
       .catch(reject);
   },
   'should request order info': function (resolve, reject) {
@@ -127,11 +121,9 @@ module.exports = {
 
     mocks.attach(mockData);
 
-    const order = createOrder();
-    order.account.on({
-      error: reject,
-      success: function () {
-        order.getInfo()
+    createOrder()
+      .then(function (order) {
+        return order.getInfo()
           .then(function (info) {
             const request = getRequest(mocks.collect(), '/order/995569897/168511849427');
 
@@ -140,37 +132,33 @@ module.exports = {
             }
 
             suit.equals(order.status, 'ready', 'Wrong order status');
-
-            resolve();
           })
-          .catch(reject);
-      }
-    });
+      })
+      .then(resolve)
+      .catch(reject);
   },
   'should send validation requests': function (resolve, reject) {
     const { data: { mocks }, suit } = this;
 
     mocks.attach(mockData);
 
-    const order = createOrder();
-    order.account.on({
-      error: reject,
-    });
-    order.getAllChallenges()
-      .then(function (challenges) {
-        return order.validate(challenges)
+    createOrder()
+      .then(function (order) {
+        return order.getAllChallenges()
+          .then(function (challenges) {
+            return order.validate(challenges);
+          })
+          .then(function (result) {
+            const request = getRequest(mocks.collect(), '/order/995569897/168511849427');
+
+            if (!request) {
+              throw 'Request has not been sent';
+            }
+
+            suit.equals(order.status, 'ready', 'Wrong order status');
+          })
       })
-      .then(function (result) {
-        const request = getRequest(mocks.collect(), '/order/995569897/168511849427');
-
-        if (!request) {
-          throw 'Request has not been sent';
-        }
-
-        suit.equals(order.status, 'ready', 'Wrong order status');
-
-        resolve();
-      })
+      .then(resolve)
       .catch(reject);
   },
   'should send finalize request and download certificate': function (resolve, reject) {
@@ -178,19 +166,14 @@ module.exports = {
 
     mocks.attach(mockData);
 
-    const order = createOrder(undefined, {
-      onError: reject,
-      onSuccess: function () {
-        order.getInfo()
+    createOrder()
+      .then(function (order) {
+        return order.getInfo()
           .then(function () {
             return order.finalize({ commonName: 'other.com' }, { key: privateKey });
           })
           .then(function () {
             const request = getRequest(mocks.collect(), '/finalize/995569897/168511849427');
-
-            if (!request) {
-              throw 'Request has not been sent';
-            }
 
             checkRequestData(suit, request, {
               protected: 'eyJhbGciOiJSUzI1NiIsIm5vbmNlIjoiQTVGRU1qbElOaUhGODBxeHV5VUNNVFZaT0JnNmRmTTZzWHNkTTI2anNZeGxyc2siLCJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvZmluYWxpemUvOTk1NTY5ODk3LzE2ODUxMTg0OTQyNyIsImtpZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTA4NC9hY2N0Lzk5NTU2OTg5NyJ9',
@@ -217,16 +200,11 @@ module.exports = {
                   CERTIFICATE,
                   'Wrong download certificate result'
                 );
-
-                resolve();
               })
           })
-          .catch(reject);
-      }
-    });
-    order.account.on({
-      error: reject,
-    });
+      })
+      .then(resolve)
+      .catch(reject);
   },
   'should go through all certificate issue process': function (resolve, reject) {
     const { data: { mocks }, suit } = this;
@@ -235,53 +213,54 @@ module.exports = {
 
     new Account({ api: 'http://localhost:5084', key: privateKey })
       .create()
-      .on({ error: reject })
-      .requestCertificateIssue({
-        domains: ['example.com', 'sub.example.com', 'sub1.example.com'],
-        csrFields: { commonName: 'example.com' },
-        orderKey: privateKey,
-        validation: function (challenges) {
-          const requests = mocks.collect();
-          const accountRequest = getRequest(requests, '/sub/new-acct');
-          const orderRequest = getRequest(requests, '/new-order');
-          const auths = [
-            getRequest(requests, '/authz/208626448057'),
-            getRequest(requests, '/authz/208626448067'),
-            getRequest(requests, '/authz/208626448077'),
-          ];
-          checkRequestData(suit, accountRequest, {
-            payload: 'eyJ0ZXJtc09mU2VydmljZUFncmVlZCI6dHJ1ZX0'
-          }, { prefix: '[account]' });
-          checkRequestData(suit, orderRequest, {
-            payload: 'eyJpZGVudGlmaWVycyI6W3sidHlwZSI6ImRucyIsInZhbHVlIjoiZXhhbXBsZS5jb20ifSx7InR5cGUiOiJkbnMiLCJ2YWx1ZSI6InN1Yi5leGFtcGxlLmNvbSJ9LHsidHlwZSI6ImRucyIsInZhbHVlIjoic3ViMS5leGFtcGxlLmNvbSJ9XX0'
-          }, { prefix: '[order]' });
-          checkRequestData(suit, auths[0], undefined, { prefix: '[order]' });
-          checkRequestData(suit, auths[1], undefined, { prefix: '[order]' });
-          checkRequestData(suit, auths[2], undefined, { prefix: '[order]' });
-          checkFields(suit, challenges[0], {
-            status: 'valid',
-            identifier: 'example.com',
-            url: 'http://localhost:5084/chall/208626448057/RQl2-A',
-            token: 'gaW1F_vpIqGuNgNiArezA3Lk334Bdk4xzwyyKqYuClE',
-            key: 'gaW1F_vpIqGuNgNiArezA3Lk334Bdk4xzwyyKqYuClE.d7GAEzos3M9j4MWFo68aL9z-TiAOMtaGzr8YElpROTc',
-          });
-          checkFields(suit, challenges[1], {
-            identifier: 'sub.example.com',
-            status: 'pending',
-            url: 'http://localhost:5084/chall/208626448067/vY7eRg',
-            token: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s',
-            key: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s.d7GAEzos3M9j4MWFo68aL9z-TiAOMtaGzr8YElpROTc',
-          });
-          checkFields(suit, challenges[2], {
-            identifier: 'sub1.example.com',
-            status: 'pending',
-            url: 'http://localhost:5084/chall/208626448077/vY7eRg',
-            token: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s',
-            key: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s.d7GAEzos3M9j4MWFo68aL9z-TiAOMtaGzr8YElpROTc',
-          });
+      .then(function (account) {
+        return account.requestCertificateIssue({
+          domains: ['example.com', 'sub.example.com', 'sub1.example.com'],
+          csrFields: { commonName: 'example.com' },
+          orderKey: privateKey,
+          validation: function (challenges) {
+            const requests = mocks.collect();
+            const accountRequest = getRequest(requests, '/sub/new-acct');
+            const orderRequest = getRequest(requests, '/new-order');
+            const auths = [
+              getRequest(requests, '/authz/208626448057'),
+              getRequest(requests, '/authz/208626448067'),
+              getRequest(requests, '/authz/208626448077'),
+            ];
+            checkRequestData(suit, accountRequest, {
+              payload: 'eyJ0ZXJtc09mU2VydmljZUFncmVlZCI6dHJ1ZX0'
+            }, { prefix: '[account]' });
+            checkRequestData(suit, orderRequest, {
+              payload: 'eyJpZGVudGlmaWVycyI6W3sidHlwZSI6ImRucyIsInZhbHVlIjoiZXhhbXBsZS5jb20ifSx7InR5cGUiOiJkbnMiLCJ2YWx1ZSI6InN1Yi5leGFtcGxlLmNvbSJ9LHsidHlwZSI6ImRucyIsInZhbHVlIjoic3ViMS5leGFtcGxlLmNvbSJ9XX0'
+            }, { prefix: '[order]' });
+            checkRequestData(suit, auths[0], undefined, { prefix: '[order]' });
+            checkRequestData(suit, auths[1], undefined, { prefix: '[order]' });
+            checkRequestData(suit, auths[2], undefined, { prefix: '[order]' });
+            checkFields(suit, challenges[0], {
+              status: 'valid',
+              identifier: 'example.com',
+              url: 'http://localhost:5084/chall/208626448057/RQl2-A',
+              token: 'gaW1F_vpIqGuNgNiArezA3Lk334Bdk4xzwyyKqYuClE',
+              key: 'gaW1F_vpIqGuNgNiArezA3Lk334Bdk4xzwyyKqYuClE.d7GAEzos3M9j4MWFo68aL9z-TiAOMtaGzr8YElpROTc',
+            });
+            checkFields(suit, challenges[1], {
+              identifier: 'sub.example.com',
+              status: 'pending',
+              url: 'http://localhost:5084/chall/208626448067/vY7eRg',
+              token: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s',
+              key: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s.d7GAEzos3M9j4MWFo68aL9z-TiAOMtaGzr8YElpROTc',
+            });
+            checkFields(suit, challenges[2], {
+              identifier: 'sub1.example.com',
+              status: 'pending',
+              url: 'http://localhost:5084/chall/208626448077/vY7eRg',
+              token: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s',
+              key: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s.d7GAEzos3M9j4MWFo68aL9z-TiAOMtaGzr8YElpROTc',
+            });
 
-          return Promise.resolve();
-        }
+            return Promise.resolve();
+          }
+        })
       })
       .then(function (result) {
         const requests = mocks.collect();
@@ -315,9 +294,8 @@ module.exports = {
           CERTIFICATE,
           'Wrong certificate data'
         );
-
-        resolve();
       })
+      .then(resolve)
       .catch(reject);
   }
 };

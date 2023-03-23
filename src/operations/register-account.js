@@ -43,6 +43,10 @@ module.exports = {
     account.orders = response.data.orders || '';
     account.api.setKID(response.headers.location);
 
+    if (this.params.resolve instanceof Function) {
+      this.params.resolve(account);
+    }
+
     queue.next();
   }
 }

@@ -30,7 +30,7 @@ module.exports = {
   },
   error: handleError,
   success: function (result) {
-    this.params.callback(result);
+    this.params.resolve(result);
 
     this.queue.next();
   }

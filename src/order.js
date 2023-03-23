@@ -7,31 +7,32 @@ const getCertificateOperation = require('./operations/get-certificate.js');
 const { parseResponse, updateOrderFields } = require('./utils.js');
 const { DEFAULT_VALIDATION_OPTIONS } = require('./constants.js');
 
-function Order (account, domains, params) {
+function Order (account) {
   this.account = account;
-
-  if (domains) {
-    this.create(domains, params);
-  }
 }
 Order.prototype.create = function (domains, params = {}) {
-  this.account.queue.push(createOrderOperation, {
-    order: this,
-    domains: domains,
-    params: params,
-    resolve: params.onSuccess,
-    reject: params.onError,
-  });
+  const order = this;
 
-  return this;
+  return new Promise(function (resolve, reject) {
+    order.account.queue.push(createOrderOperation, {
+      order: order,
+      domains: domains,
+      params: params,
+      resolve: resolve,
+      reject: reject,
+    });
+  });
 }
-Order.prototype.getIdentifiers = function (callback) {
-  this.account.queue.push(getIdentifiersOperation, {
-    order: this,
-    callback: callback,
-  });
+Order.prototype.getIdentifiers = function () {
+  const order = this;
 
-  return this;
+  return new Promise(function (resolve, reject) {
+    order.account.queue.push(getIdentifiersOperation, {
+      order: order,
+      resolve: resolve,
+      reject: reject,
+    });
+  });
 }
 Order.prototype.getAllChallenges = function (type) {
   const account = this.account;
@@ -41,13 +42,14 @@ Order.prototype.getAllChallenges = function (type) {
     account.queue.push(getAllChallengesOperation, {
       type: type,
       order: order,
-      callback: resolve,
+      resolve: resolve,
       reject: reject,
     });
   });
 }
 Order.prototype.validate = function (challenges, params = {}) {
   const order = this;
+
   return new Promise(function (resolve, reject) {
     order.account.queue.push(validationOperation, {
       order: order,
@@ -110,6 +112,9 @@ Order.prototype.getCertificate = function () {
       reject: reject,
     });
   });
+}
+Order.create = function (account, domains, params) {
+  return new Order(account).create(domains, params);
 }
 
 module.exports = { Order };

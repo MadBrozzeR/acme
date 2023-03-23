@@ -36,13 +36,18 @@ function Account (options = {}) {
 }
 
 Account.prototype.create = function (params) {
-  if (!this.privateKey) {
-    this.queue.push(createAccountOperation, params);
-  }
+  const account = this;
 
-  this.queue.push(registerAccountOperation);
+  return new Promise(function (resolve, reject) {
+    if (!account.privateKey) {
+      account.queue.push(createAccountOperation, params);
+    }
 
-  return this;
+    account.queue.push(registerAccountOperation, {
+      resolve: resolve,
+      reject: reject,
+    });
+  });
 }
 
 /**
@@ -71,7 +76,7 @@ Account.prototype.setup = function (options = {}) {
   return this;
 }
 Account.prototype.createOrder = function (domains, params) {
-  return new Order(this, domains, params);
+  return Order.create(this, domains, params);
 }
 Account.prototype.getThumbprint = function () {
   if (this.thumb) {
@@ -99,19 +104,24 @@ Account.prototype.requestCertificateIssue = function (params) {
     domains, challengeType = CHALLENGE.HTTP1, csrFields, validation, orderKey
   } = params;
 
-  const order = this.createOrder(domains);
-
-  return order.getAllChallenges(challengeType)
-    .then(function (challenges) {
-      return validation(challenges)
+  return this.createOrder(domains)
+    .then(function (order) {
+      return order.getAllChallenges(challengeType)
+        .then(function (challenges) {
+          return validation(challenges)
+            .then(function () {
+              return challenges;
+            });
+        })
+        .then(function (challenges) {
+          return order.validate(challenges);
+        })
         .then(function () {
-          return challenges;
-        });
-    })
-    .then(function (challenges) {
-      order.validate(challenges);
-      order.finalize(csrFields, { key: orderKey });
-      return order.getCertificate()
+          return order.finalize(csrFields, { key: orderKey });
+        })
+        .then(function () {
+          return order.getCertificate();
+        })
         .then(function (certificate) {
           return {
             keys: order.keys ? {
@@ -120,7 +130,7 @@ Account.prototype.requestCertificateIssue = function (params) {
             } : null,
             certificate: certificate,
           };
-        })
+        });
     });
 }
 Account.prototype.getCacheFiles = function () {

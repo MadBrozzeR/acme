@@ -7,7 +7,7 @@ module.exports = {
     this.queue.trigger('success', order.domains || {});
   },
   success: function (domains) {
-    this.params.callback(domains);
+    this.params.resolve(domains);
 
     this.queue.next();
   }
