@@ -2,6 +2,8 @@ const { createKeyPair, getJWSAuth } = require('../crypting.js');
 const { handleError } = require('./common.js');
 
 module.exports = {
+  name: 'create-account',
+
   init: function () {
     const queue = this.queue;
     const params = this.params;

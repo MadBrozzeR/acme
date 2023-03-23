@@ -3,6 +3,8 @@ const { useFile } = require('../utils.js');
 const { handleError } = require('./common.js');
 
 module.exports = {
+  name: 'get-certificate',
+
   init: function () {
     const order = this.params.order;
     const queue = this.queue;
@@ -50,7 +52,7 @@ module.exports = {
             return response.data();
           }
 
-          throw new Error('Failed to fetch certificat. Status: ' + response.raw.statusCode);
+          throw new Error('Failed to fetch certificate. Status: ' + response.raw.statusCode);
         })
     }, file, { format: 'text' })
       .then(function (data) {

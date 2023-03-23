@@ -2,6 +2,8 @@ const { useFile, parseResponse } = require("../utils.js");
 const { handleError } = require('./common.js');
 
 module.exports = {
+  name: 'register-account',
+
   init: function () {
     const queue = this.queue;
     const account = queue.data.account;

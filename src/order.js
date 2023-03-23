@@ -14,11 +14,13 @@ function Order (account, domains, params) {
     this.create(domains, params);
   }
 }
-Order.prototype.create = function (domains, params) {
+Order.prototype.create = function (domains, params = {}) {
   this.account.queue.push(createOrderOperation, {
     order: this,
     domains: domains,
     params: params,
+    resolve: params.onSuccess,
+    reject: params.onError,
   });
 
   return this;
@@ -35,11 +37,12 @@ Order.prototype.getAllChallenges = function (type) {
   const account = this.account;
   const order = this;
 
-  return new Promise(function (resolve) {
+  return new Promise(function (resolve, reject) {
     account.queue.push(getAllChallengesOperation, {
       type: type,
       order: order,
       callback: resolve,
+      reject: reject,
     });
   });
 }

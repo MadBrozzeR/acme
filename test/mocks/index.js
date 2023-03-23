@@ -13,11 +13,11 @@ function mockData (request) {
     case '/new-order':
       return orderMocks.newOrder;
     case '/authz/208626448057':
-      return orderMocks.authorizationValid;
+      return orderMocks.authorization({ id: '208626448057', domain: 'example.com', status: 'valid' });
     case '/authz/208626448067':
-      return orderMocks.authorizationPending;
+      return orderMocks.authorization({ id: '208626448067', domain: 'sub.example.com', status: 'pending' });
     case '/authz/208626448077':
-      return orderMocks.authorizationPending;
+      return orderMocks.authorization({ id: '208626448077', domain: 'sub1.example.com', status: 'pending' });
     case '/order/995569897/168511849427':
       return orderMocks.orderInfo;
     case '/finalize/995569897/168511849427':

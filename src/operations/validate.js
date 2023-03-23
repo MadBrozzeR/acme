@@ -3,6 +3,8 @@ const { STATUS } = require('../constants.js');
 const { handleError } = require('./common.js');
 
 module.exports = {
+  name: 'validate',
+
   init: function () {
     const challenges = this.params.challenges;
     const api = this.params.order.account.api;

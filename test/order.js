@@ -8,6 +8,8 @@ function createOrder(domains = ['example.com', 'sub.example.com', 'sub1.example.
     .createOrder(domains, params);
 }
 
+const CERTIFICATE = '-----BEGIN CERTIFICATE-----\naaaaaaaaaaaa\n-----END CERTIFICATE-----';
+
 module.exports = {
   'should create new order with one domain': function (resolve, reject) {
     const { data: { mocks}, suit } = this;
@@ -101,23 +103,24 @@ module.exports = {
           identifier: 'sub.example.com',
           expires: '2023-03-13T12:47:46Z',
           status: 'pending',
-          url: 'http://localhost:5084/chall/208665084747/vY7eRg',
+          url: 'http://localhost:5084/chall/208626448067/vY7eRg',
           token: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s',
           key: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s.d7GAEzos3M9j4MWFo68aL9z-TiAOMtaGzr8YElpROTc',
           validationRecord: null
         });
         checkFields(suit, result[2], {
           type: 'http-01',
-          identifier: 'sub.example.com',
+          identifier: 'sub1.example.com',
           status: 'pending',
-          url: 'http://localhost:5084/chall/208665084747/vY7eRg',
+          url: 'http://localhost:5084/chall/208626448077/vY7eRg',
           token: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s',
           key: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s.d7GAEzos3M9j4MWFo68aL9z-TiAOMtaGzr8YElpROTc',
           validationRecord: null
         });
 
         resolve();
-      });
+      })
+      .catch(reject);
   },
   'should request order info': function (resolve, reject) {
     const { data: { mocks }, suit } = this;
@@ -175,10 +178,9 @@ module.exports = {
 
     mocks.attach(mockData);
 
-    const order = createOrder();
-    order.account.on({
-      error: reject,
-      success: function () {
+    const order = createOrder(undefined, {
+      onError: reject,
+      onSuccess: function () {
         order.getInfo()
           .then(function () {
             return order.finalize({ commonName: 'other.com' }, { key: privateKey });
@@ -212,7 +214,7 @@ module.exports = {
 
                 suit.equals(
                   data.toString(),
-                  '-----BEGIN CERTIFICATE-----\naaaaaaaaaaaa\n-----END CERTIFICATE-----',
+                  CERTIFICATE,
                   'Wrong download certificate result'
                 );
 
@@ -222,5 +224,100 @@ module.exports = {
           .catch(reject);
       }
     });
+    order.account.on({
+      error: reject,
+    });
   },
+  'should go through all certificate issue process': function (resolve, reject) {
+    const { data: { mocks }, suit } = this;
+
+    mocks.attach(mockData);
+
+    new Account({ api: 'http://localhost:5084', key: privateKey })
+      .create()
+      .on({ error: reject })
+      .requestCertificateIssue({
+        domains: ['example.com', 'sub.example.com', 'sub1.example.com'],
+        csrFields: { commonName: 'example.com' },
+        orderKey: privateKey,
+        validation: function (challenges) {
+          const requests = mocks.collect();
+          const accountRequest = getRequest(requests, '/sub/new-acct');
+          const orderRequest = getRequest(requests, '/new-order');
+          const auths = [
+            getRequest(requests, '/authz/208626448057'),
+            getRequest(requests, '/authz/208626448067'),
+            getRequest(requests, '/authz/208626448077'),
+          ];
+          checkRequestData(suit, accountRequest, {
+            payload: 'eyJ0ZXJtc09mU2VydmljZUFncmVlZCI6dHJ1ZX0'
+          }, { prefix: '[account]' });
+          checkRequestData(suit, orderRequest, {
+            payload: 'eyJpZGVudGlmaWVycyI6W3sidHlwZSI6ImRucyIsInZhbHVlIjoiZXhhbXBsZS5jb20ifSx7InR5cGUiOiJkbnMiLCJ2YWx1ZSI6InN1Yi5leGFtcGxlLmNvbSJ9LHsidHlwZSI6ImRucyIsInZhbHVlIjoic3ViMS5leGFtcGxlLmNvbSJ9XX0'
+          }, { prefix: '[order]' });
+          checkRequestData(suit, auths[0], undefined, { prefix: '[order]' });
+          checkRequestData(suit, auths[1], undefined, { prefix: '[order]' });
+          checkRequestData(suit, auths[2], undefined, { prefix: '[order]' });
+          checkFields(suit, challenges[0], {
+            status: 'valid',
+            identifier: 'example.com',
+            url: 'http://localhost:5084/chall/208626448057/RQl2-A',
+            token: 'gaW1F_vpIqGuNgNiArezA3Lk334Bdk4xzwyyKqYuClE',
+            key: 'gaW1F_vpIqGuNgNiArezA3Lk334Bdk4xzwyyKqYuClE.d7GAEzos3M9j4MWFo68aL9z-TiAOMtaGzr8YElpROTc',
+          });
+          checkFields(suit, challenges[1], {
+            identifier: 'sub.example.com',
+            status: 'pending',
+            url: 'http://localhost:5084/chall/208626448067/vY7eRg',
+            token: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s',
+            key: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s.d7GAEzos3M9j4MWFo68aL9z-TiAOMtaGzr8YElpROTc',
+          });
+          checkFields(suit, challenges[2], {
+            identifier: 'sub1.example.com',
+            status: 'pending',
+            url: 'http://localhost:5084/chall/208626448077/vY7eRg',
+            token: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s',
+            key: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s.d7GAEzos3M9j4MWFo68aL9z-TiAOMtaGzr8YElpROTc',
+          });
+
+          return Promise.resolve();
+        }
+      })
+      .then(function (result) {
+        const requests = mocks.collect();
+        const ready = [
+          getRequest(requests, '/chall/208626448057/RQl2-A'),
+          getRequest(requests, '/chall/208626448067/vY7eRg'),
+          getRequest(requests, '/chall/208626448077/vY7eRg'),
+        ];
+        const checkRequest = getRequest(requests, '/order/995569897/168511849427');
+        const finalizationRequest = getRequest(requests, '/finalize/995569897/168511849427');
+        const downloadRequest = getRequest(requests, '/cert/03b4601321c9afdadc903b2b7da67f53aafe');
+
+        if (ready[0]) {
+          throw 'Unnecessary request without pending status has been sent';
+        }
+
+        checkRequestData(suit, ready[1], { payload: 'e30' }, '[ready 1]');
+        checkRequestData(suit, ready[2], { payload: 'e30' }, '[ready 2]');
+        checkRequestData(suit, checkRequest, undefined, '[check]');
+        checkRequestData(suit, finalizationRequest, { payload: 'eyJjc3IiOiJNSUlCSERDQnh3SUJBREFXTVJRd0VnWURWUVFERXd0bGVHRnRjR3hsTG1OdmJUQmNNQTBHQ1NxR1NJYjNEUUVCQVFVQUEwc0FNRWdDUVFDdFVZa29PX2hOck5yY2dyWV8tdHlGNVBSZkowLU9QandUc3FBZkszOHM3WkZGZ1A4NFFJMk0xVHZneDVmM0hIQVBmZWptbHVjY1E4OWkzbDlnLW5LSkFnTUJBQUdnVERCS0Jna3Foa2lHOXcwQkNRNHhQVEE3TURrR0ExVWRFUVF5TURDQ0MyVjRZVzF3YkdVdVkyOXRnZzl6ZFdJdVpYaGhiWEJzWlM1amIyMkNFSE4xWWpFdVpYaGhiWEJzWlM1amIyMHdEUVlKS29aSWh2Y05BUUVMQlFBRFFRQUQ0dU04d3pRWFA2OTNRbVVtUUlscEFoZm0xd2pQTnZPWWstZGlIeTVQeERPSVdmZ1d2Y19KYktQSTVwMW12X2NybGY1eEM1Yk54aUdLUmRyWm9fM2cifQ' }, { prefix: '[finalization]' });
+        checkRequestData(suit, downloadRequest, undefined, { prefix: '[download]' });
+        checkFields(suit, result.keys, {
+          publicKey: '-----BEGIN PUBLIC KEY-----\n' +
+            'MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAK1RiSg7+E2s2tyCtj/63IXk9F8nT44+\n' +
+            'PBOyoB8rfyztkUWA/zhAjYzVO+DHl/cccA996OaW5xxDz2LeX2D6cokCAwEAAQ==\n' +
+            '-----END PUBLIC KEY-----',
+          privateKey: privateKey
+        });
+        suit.equals(
+          result.certificate.toString(),
+          CERTIFICATE,
+          'Wrong certificate data'
+        );
+
+        resolve();
+      })
+      .catch(reject);
+  }
 };

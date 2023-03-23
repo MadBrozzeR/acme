@@ -69,9 +69,9 @@ module.exports = {
         const requests = mocks.collect();
 
         equals(requests.length, 3, 'Wrong request count');
-        checkRequest(suit, requests[0], { prefix: 'directory', path: '/directory', method: 'GET' });
-        checkRequest(suit, requests[1], { prefix: 'nonce', path: '/new-nonce', method: 'HEAD' });
-        checkRequest(suit, requests[2], { prefix: 'request', path: '/random-request', method: 'POST' });
+        checkRequest(suit, requests[0], { prefix: '[directory]', path: '/directory', method: 'GET' });
+        checkRequest(suit, requests[1], { prefix: '[nonce]', path: '/new-nonce', method: 'HEAD' });
+        checkRequest(suit, requests[2], { prefix: '[request]', path: '/random-request', method: 'POST' });
 
         const requestData = JSON.parse(requests[2].data);
 
@@ -85,7 +85,7 @@ module.exports = {
         const requests = mocks.collect();
 
         equals(requests.length, 2, 'Wrong request count in second request');
-        checkRequest(suit, requests[1], { prefix: 'second', path: '/second-request', method: 'POST' });
+        checkRequest(suit, requests[1], { prefix: '[second]', path: '/second-request', method: 'POST' });
 
         const requestData = JSON.parse(requests[1].data);
 

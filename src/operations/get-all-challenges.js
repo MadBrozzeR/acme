@@ -2,6 +2,8 @@ const { useFile } = require("../utils.js");
 const { handleError } = require('./common.js');
 
 module.exports = {
+  name: 'get-all-challenges',
+
   init: function () {
     const queue = this.queue;
     const domains = this.params.order.domains;

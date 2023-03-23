@@ -1,4 +1,6 @@
 module.exports = {
+  name: 'get-identifiers',
+
   init: function () {
     const order = this.params.order;
 

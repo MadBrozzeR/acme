@@ -87,13 +87,16 @@ Account.create = function (params, options) {
  * Complete certificate issue request.
  * @param {string | string[]} domains - domain and subdomain list;
  * @param {string} [challengeType] - challenge tipe, like 'http-01' or 'dns-01' (default 'http-01');
+ * @param {string} [orderKey] - provide private key for order or create new key pair otherwise;
  * @param {object} csrFields - field list to include in certificate request;
  * @param {string} csrFields.commonName - common came in csr;
  * @param { (challenges) => Promise<void> } validation - function to be called when challenges
  *  are ready; returned Promise should be resolved when CA can validate domains.
  */
 Account.prototype.requestCertificateIssue = function (params) {
-  const { domains, challengeType = CHALLENGE.HTTP1, csrFields, validation } = params;
+  const {
+    domains, challengeType = CHALLENGE.HTTP1, csrFields, validation, orderKey
+  } = params;
 
   const order = this.createOrder(domains);
 
@@ -106,7 +109,7 @@ Account.prototype.requestCertificateIssue = function (params) {
     })
     .then(function (challenges) {
       order.validate(challenges);
-      order.finalize(csrFields);
+      order.finalize(csrFields, { key: orderKey });
       return order.getCertificate()
         .then(function (certificate) {
           return {

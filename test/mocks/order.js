@@ -39,88 +39,82 @@ module.exports.newOrder = {
   }
 }
 
-module.exports.authorizationPending = {
-  status: 200,
-  headers: {
-    'server': 'nginx',
-    'date': 'Mon, 06 Mar 2023 12:47:46 GMT',
-    'content-type': 'application/json',
-    'connection': 'close',
-    'cache-control': 'public, max-age=0, no-cache',
-    'link': '<http://localhost:5084/directory>;rel=\'index\'',
-    'x-frame-options': 'DENY',
-    'strict-transport-security': 'max-age=604800'
-  },
-  data: {
+module.exports.authorization = function ({
+  id,
+  domain,
+  status = 'pending'
+}) {
+  const data = {
     identifier: {
       type: 'dns',
-      value: 'sub.example.com'
+      value: domain,
     },
-    status: 'pending',
+    status: status,
     expires: '2023-03-13T12:47:46Z',
-    challenges: [
-      {
-        type: 'http-01',
-        status: 'pending',
-        url: 'http://localhost:5084/chall/208665084747/vY7eRg',
-        token: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s'
-      },
-      {
-        type: 'dns-01',
-        status: 'pending',
-        url: 'http://localhost:5084/chall/208665084747/WTsGpw',
-        token: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s'
-      },
-      {
-        type: 'tls-alpn-01',
-        status: 'pending',
-        url: 'http://localhost:5084/chall/208665084747/CjxeiA',
-        token: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s'
-      }
-    ]
-  }
-};
+  };
 
-module.exports.authorizationValid = {
-  status: 200,
-  headers: {
-    'server': 'nginx',
-    'date': 'Mon, 06 Mar 2023 12:47:46 GMT',
-    'content-type': 'application/json',
-    'connection': 'close',
-    'cache-control': 'public, max-age=0, no-cache',
-    'link': '<http://localhost:5084/directory>;rel=\'index\'',
-    'x-frame-options': 'DENY',
-    'strict-transport-security': 'max-age=604800'
-  },
-  data: {
-    identifier: {
-      type: 'dns',
-      value: 'example.com'
-    },
-    status: 'valid',
-    expires: '2023-04-05T11:10:36Z',
-    challenges: [
-      {
-        type: 'http-01',
-        status: 'valid',
-        url: 'http://localhost:5084/chall/208626448057/RQl2-A',
-        token: 'gaW1F_vpIqGuNgNiArezA3Lk334Bdk4xzwyyKqYuClE',
-        validationRecord: [
-          {
-            url: 'http://example.com/.well-known/acme-challenge/gaW1F_vpIqGuNgNiArezA3Lk334Bdk4xzwyyKqYuClE',
-            hostname: 'example.com',
-            port: '80',
-            addressesResolved: [
-              '127.0.0.1'
-            ],
-            addressUsed: '127.0.0.1'
-          }
-        ],
-        validated: '2023-03-06T11:10:25Z'
-      }
-    ]
+  switch (status) {
+    case 'pending':
+      data.challenges = [
+        {
+          type: 'http-01',
+          status: 'pending',
+          url: 'http://localhost:5084/chall/' + id + '/vY7eRg',
+          token: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s'
+        },
+        {
+          type: 'dns-01',
+          status: 'pending',
+          url: 'http://localhost:5084/chall/' + id + '/WTsGpw',
+          token: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s'
+        },
+        {
+          type: 'tls-alpn-01',
+          status: 'pending',
+          url: 'http://localhost:5084/chall/' + id + '/CjxeiA',
+          token: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s'
+        }
+      ];
+      break;
+
+    default:
+      data.challenges = [
+        {
+          type: 'http-01',
+          status: 'valid',
+          url: 'http://localhost:5084/chall/' + id + '/RQl2-A',
+          token: 'gaW1F_vpIqGuNgNiArezA3Lk334Bdk4xzwyyKqYuClE',
+          validationRecord: [
+            {
+              url: 'http://' + domain + '/.well-known/acme-challenge/gaW1F_vpIqGuNgNiArezA3Lk334Bdk4xzwyyKqYuClE',
+              hostname: domain,
+              port: '80',
+              addressesResolved: [
+                '127.0.0.1'
+              ],
+              addressUsed: '127.0.0.1'
+            }
+          ],
+          validated: '2023-03-06T11:10:25Z'
+        }
+      ];
+      break;
   }
+
+  return {
+    status: 200,
+    headers: {
+      'server': 'nginx',
+      'date': 'Mon, 06 Mar 2023 12:47:46 GMT',
+      'content-type': 'application/json',
+      'connection': 'close',
+      'cache-control': 'public, max-age=0, no-cache',
+      'link': '<http://localhost:5084/directory>;rel=\'index\'',
+      'x-frame-options': 'DENY',
+      'strict-transport-security': 'max-age=604800'
+    },
+    data: data
+  };
 };
 
 module.exports.orderInfo = {

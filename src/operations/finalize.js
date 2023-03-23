@@ -5,6 +5,8 @@ const { STATUS } = require('../constants.js');
 const { handleError } = require('./common.js');
 
 module.exports = {
+  name: 'finalize',
+
   init: function () {
     const { order } = this.params;
     const queue = this.queue;

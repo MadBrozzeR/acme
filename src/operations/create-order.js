@@ -3,6 +3,8 @@ const { Identifier } = require('../identifier.js');
 const { handleError } = require('./common.js');
 
 module.exports = {
+  name: 'create-order',
+
   init: function () {
     const queue = this.queue;
     const api = queue.data.account.api;
@@ -50,6 +52,7 @@ module.exports = {
     const order = this.params.order;
 
     Object.assign(order, result);
+    (this.params.resolve instanceof Function) && (this.params.resolve(order));
 
     this.queue.next();
   }
