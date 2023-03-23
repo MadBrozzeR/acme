@@ -64,34 +64,34 @@ module.exports = {
 
     mocks.attach(mockData);
 
-    return apiRequest.request('/random-request', { dataToSend: 'test' }, { useJWK: true })
+    return apiRequest.request('/new-order', { dataToSend: 'test' }, { useJWK: true })
       .then(function () {
         const requests = mocks.collect();
 
         equals(requests.length, 3, 'Wrong request count');
         checkRequest(suit, requests[0], { prefix: '[directory]', path: '/directory', method: 'GET' });
         checkRequest(suit, requests[1], { prefix: '[nonce]', path: '/new-nonce', method: 'HEAD' });
-        checkRequest(suit, requests[2], { prefix: '[request]', path: '/random-request', method: 'POST' });
+        checkRequest(suit, requests[2], { prefix: '[request]', path: '/new-order', method: 'POST' });
 
         const requestData = JSON.parse(requests[2].data);
 
-        equals(requestData.protected, 'eyJhbGciOiJSUzI1NiIsIm5vbmNlIjoiQTVGRU1qbElOaUhGODBxeHV5VUNNVFZaT0JnNmRmTTZzWHNkTTI2anNZeGxyc2siLCJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvcmFuZG9tLXJlcXVlc3QiLCJqd2siOnsiZSI6IkFRQUIiLCJuIjoiclZHSktEdjRUYXphM0lLMlBfcmNoZVQwWHlkUGpqNDhFN0tnSHl0X0xPMlJSWURfT0VDTmpOVTc0TWVYOXh4d0QzM281cGJuSEVQUFl0NWZZUHB5aVEiLCJrdHkiOiJSU0EifX0', 'Wrong protected field data');
+        equals(requestData.protected, 'eyJhbGciOiJSUzI1NiIsIm5vbmNlIjoiQTVGRU1qbElOaUhGODBxeHV5VUNNVFZaT0JnNmRmTTZzWHNkTTI2anNZeGxyc2siLCJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvbmV3LW9yZGVyIiwiandrIjp7ImUiOiJBUUFCIiwibiI6InJWR0pLRHY0VGF6YTNJSzJQX3JjaGVUMFh5ZFBqajQ4RTdLZ0h5dF9MTzJSUllEX09FQ05qTlU3NE1lWDl4eHdEMzNvNXBibkhFUFBZdDVmWVBweWlRIiwia3R5IjoiUlNBIn19', 'Wrong protected field data');
         equals(requestData.payload, 'eyJkYXRhVG9TZW5kIjoidGVzdCJ9', 'Wrong payload field data');
-        equals(requestData.signature, 'TTvzlXvfWVgOUfxdtenctcol64by2_EYFqEUYEtF3ChvX4MumT6ebiePODqV4TbQSU8DzPmSsRMstfBkr29tDw', 'Wrong signature field data');
+        equals(requestData.signature, 'lfJKl7FCfmmYyH1sy15DF26yLl0aQ5Z4lzq6YIaRf6dn57JHnZxbauCLBoF1zqXNY_gLtBHV8W7AoUUnX6vW9Q', 'Wrong signature field data');
 
         return apiRequest.request('http://localhost:5084/second-request');
       })
       .then(function () {
         const requests = mocks.collect();
 
-        equals(requests.length, 2, 'Wrong request count in second request');
-        checkRequest(suit, requests[1], { prefix: '[second]', path: '/second-request', method: 'POST' });
+        equals(requests.length, 1, 'Wrong request count in second request');
+        checkRequest(suit, requests[0], { prefix: '[second]', path: '/second-request', method: 'POST' });
 
-        const requestData = JSON.parse(requests[1].data);
+        const requestData = JSON.parse(requests[0].data);
 
-        equals(requestData.protected, 'eyJhbGciOiJSUzI1NiIsIm5vbmNlIjoiQTVGRU1qbElOaUhGODBxeHV5VUNNVFZaT0JnNmRmTTZzWHNkTTI2anNZeGxyc2siLCJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvc2Vjb25kLXJlcXVlc3QiLCJraWQiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvS0lEIn0', 'Wrong protected field data for POST-AS-GET');
+        equals(requestData.protected, 'eyJhbGciOiJSUzI1NiIsIm5vbmNlIjoiRjk3N2JsSWRIVGpCbHFfNVpHdXJlc2ZrWmZlNW1wZUVuOEtEeG9HTWpUWm1xbjgiLCJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvc2Vjb25kLXJlcXVlc3QiLCJraWQiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvS0lEIn0', 'Wrong protected field data for POST-AS-GET');
         equals(requestData.payload, '', 'Wrong payload field data for POST-AS-GET');
-        equals(requestData.signature, 'g13PxKm3MZPSRhG-c7-hGH8amVFbHbwIV-ce-Clba1TrLf_qV6zg1L4GdoyWOVsgnYJ-G6Z5bUVbPVGQsKlPlw', 'Wrong signature field data for POST-AS-GET');
+        equals(requestData.signature, 'aCNs0aDmsvks2TDuGaJoToICi80Vo5ZPMN_-Lnm1kTq_y59bJjzwXFdKy_ahcWJcNSs3C1WyGYrliMVosN2wTQ', 'Wrong signature field data for POST-AS-GET');
       })
       .then(resolve)
       .catch(reject);

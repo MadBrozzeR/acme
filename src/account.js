@@ -5,6 +5,7 @@ const { CHALLENGE } = require('./constants.js');
 const { createKeyPair, getThumb, privateKeyToPEM } = require('./crypting.js');
 const createAccountOperation = require('./operations/create-account.js');
 const registerAccountOperation = require('./operations/register-account.js');
+const getAccountInfoOperation = require('./operations/get-account-info.js');
 const { Order } = require('./order.js');
 
 const queueHandlers = {
@@ -133,6 +134,16 @@ Account.prototype.on = function (listeners) {
   }
 
   return this;
+}
+Account.prototype.getInfo = function () {
+  const account = this;
+
+  return new Promise(function (resolve, reject) {
+    account.queue.push(getAccountInfoOperation, {
+      resolve: resolve,
+      reject: reject,
+    });
+  });
 }
 
 module.exports = { Account };

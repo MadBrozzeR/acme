@@ -23,9 +23,9 @@ module.exports = {
         const request = getRequest(mocks.collect(), '/new-order');
 
         checkRequestData(suit, request, {
-          protected: 'eyJhbGciOiJSUzI1NiIsIm5vbmNlIjoiQTVGRU1qbElOaUhGODBxeHV5VUNNVFZaT0JnNmRmTTZzWHNkTTI2anNZeGxyc2siLCJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvbmV3LW9yZGVyIiwia2lkIjoiaHR0cDovL2xvY2FsaG9zdDo1MDg0L2FjY3QvOTk1NTY5ODk3In0',
+          protected: 'eyJhbGciOiJSUzI1NiIsIm5vbmNlIjoiMzI3QzZMSVhEamljaGV0R0lfcDhZbXpTNDJaNHpfelhMTFVJY3hkWDNUWGUzRUEiLCJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvbmV3LW9yZGVyIiwia2lkIjoiaHR0cDovL2xvY2FsaG9zdDo1MDg0L2FjY3QvOTk1NTY5ODk3In0',
           payload: 'eyJpZGVudGlmaWVycyI6W3sidHlwZSI6ImRucyIsInZhbHVlIjoibXlleGFtcGxlLmNvbXAifV19',
-          signature: 'aDeOUxkorxhc_lzSupmnDoN4FzlwaCEor3jio2BZVF1HhgpBYmSOKBmSWJOxjDf5zjJb6x6MrRJWxOlpKlvwoA',
+          signature: 'DL0RFvk1IEb32GaogbL1oGNrC6slEhvdsYnOLUh9DZsdnRRgax5-_TxGv3WpWoFwXrRkE6usxuHdoizjf8cKgQ',
         });
 
         resolve();
@@ -44,9 +44,9 @@ module.exports = {
         const request = getRequest(mocks.collect(), '/new-order');
 
         checkRequestData(suit, request, {
-          protected: 'eyJhbGciOiJSUzI1NiIsIm5vbmNlIjoiQTVGRU1qbElOaUhGODBxeHV5VUNNVFZaT0JnNmRmTTZzWHNkTTI2anNZeGxyc2siLCJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvbmV3LW9yZGVyIiwia2lkIjoiaHR0cDovL2xvY2FsaG9zdDo1MDg0L2FjY3QvOTk1NTY5ODk3In0',
+          protected: 'eyJhbGciOiJSUzI1NiIsIm5vbmNlIjoiMzI3QzZMSVhEamljaGV0R0lfcDhZbXpTNDJaNHpfelhMTFVJY3hkWDNUWGUzRUEiLCJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvbmV3LW9yZGVyIiwia2lkIjoiaHR0cDovL2xvY2FsaG9zdDo1MDg0L2FjY3QvOTk1NTY5ODk3In0',
           payload: 'eyJpZGVudGlmaWVycyI6W3sidHlwZSI6ImRucyIsInZhbHVlIjoiZXhhbXBsZS5jb20ifSx7InR5cGUiOiJkbnMiLCJ2YWx1ZSI6InN1Yi5leGFtcGxlLmNvbSJ9LHsidHlwZSI6ImRucyIsInZhbHVlIjoic3ViMS5leGFtcGxlLmNvbSJ9XX0',
-          signature: 'NPpcLjmtV3zjR7eZ35CowaOSQKaKVzitNWgGTRV91mYmHcBsnJAsLeC3DOtAA_1ZfIFNYMGG_J8FwaXVjY7RxA',
+          signature: 'NxwHT7amcPJgdshtLFhG4QDLqlCAHLolw15aAINQaMSlPio7sOKlf2BYQdoInJxlYr--dCoiGJmqXp-UUHaLyw',
         });
 
         resolve();
@@ -207,9 +207,9 @@ module.exports = {
                 }
 
                 checkRequestData(suit, request, {
-                  protected: 'eyJhbGciOiJSUzI1NiIsIm5vbmNlIjoiQTVGRU1qbElOaUhGODBxeHV5VUNNVFZaT0JnNmRmTTZzWHNkTTI2anNZeGxyc2siLCJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvY2VydC8wM2I0NjAxMzIxYzlhZmRhZGM5MDNiMmI3ZGE2N2Y1M2FhZmUiLCJraWQiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvYWNjdC85OTU1Njk4OTcifQ',
+                  protected: 'eyJhbGciOiJSUzI1NiIsIm5vbmNlIjoiQTVGRTlYVnVER25STWpmRHI4UGFGNnNlQ0pYaU1Ld2pDTjROeS1yNG5tSm01aEEiLCJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvY2VydC8wM2I0NjAxMzIxYzlhZmRhZGM5MDNiMmI3ZGE2N2Y1M2FhZmUiLCJraWQiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvYWNjdC85OTU1Njk4OTcifQ',
                   payload: '',
-                  signature: 'oOWcabOyeoTDFISntLleHq6Gt1ivNjC8I9ptmH7nerT2kp2TK6ZGzXJVl15qlOoPrmZ_7NZOjP8J0J3Gu5-isQ',
+                  signature: 'QaagshfwCFC7ob9fvxn0K0tRJj-Mj2z24B6kpLRDYuf_7QnzUjUhPNy_E1eqsTqDOb48kW8XRdRcpgMWS7ceOA',
                 });
 
                 suit.equals(

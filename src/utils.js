@@ -156,4 +156,21 @@ function updateOrderFields (order, response) {
   return order;
 }
 
-module.exports = { base64url, getIdentifiers, parseResponse, useFile, updateOrderFields };
+function parseResponseErrorHandled (response) {
+  return parseResponse(response).then(function (response) {
+    if (response.status < 300) {
+      return response;
+    }
+
+    throw new Error('Status ' + response.status + ' returned');
+  });
+}
+
+module.exports = {
+  base64url,
+  getIdentifiers,
+  parseResponse,
+  useFile,
+  updateOrderFields,
+  parseResponseErrorHandled
+};

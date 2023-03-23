@@ -3,6 +3,7 @@ const http = require('http');
 const { LETS_ENCRYPT_API } = require('./constants.js');
 const { getJWS, getJWSAuth } = require('./crypting.js');
 const { getIdentifiers } = require('./utils.js');
+const { NonceList } = require('./nonce.js');
 
 function Response (response) {
   this.raw = response;
@@ -74,6 +75,7 @@ function ApiRequest (api = LETS_ENCRYPT_API) {
   this.kid = null;
   this.directory = null;
   this.api = LETS_ENCRYPT_API;
+  this.nonceList = new NonceList();
 
   api && this.setAPI(api);
 }
@@ -115,6 +117,22 @@ ApiRequest.prototype.getPath = function (path) {
     (this.port ? (':' + this.port) : '') +
     (path ? (path[0] === '/' ? path : ('/' + path)) : '');
 }
+ApiRequest.prototype.getNonce = function () {
+  const api = this;
+  const nonce = this.nonceList.get();
+
+  if (nonce) {
+    return Promise.resolve(nonce);
+  }
+
+  return this.getDirectory()
+    .then(function (directory) {
+      return request(api.getPath(directory.newNonce), { method: 'HEAD' });
+    })
+    .then(function (response) {
+      return response.getHeader('replay-nonce');
+    });
+}
 
 ApiRequest.prototype.request = async function (path, body = '', { useJWK } = {}) {
   if (!this.key) {
@@ -131,10 +149,7 @@ ApiRequest.prototype.request = async function (path, body = '', { useJWK } = {})
 
   const directory = await this.getDirectory();
 
-  const nonce = await request(this.getPath(directory.newNonce), { method: 'HEAD' })
-    .then(function (response) {
-      return response.getHeader('replay-nonce');
-    });
+  const nonce = await this.getNonce();
 
   if (path[0] === '$') {
     path = directory[path.substring(1)];
@@ -155,17 +170,20 @@ ApiRequest.prototype.request = async function (path, body = '', { useJWK } = {})
 
   const jws = JSON.stringify(getJWS(head, body, this.key));
 
-  return request(this.getPath(path), {
+  const response = await request(this.getPath(path), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/jose+json'
     },
     body: jws,
   });
+
+  this.nonceList.getFromResponse(response);
+
+  return response;
 }
 
 ApiRequest.prototype.accountRequest = function ({ email }) {
-  const apiRequest = this;
   const body = { termsOfServiceAgreed: true };
 
   if (email) {
@@ -217,16 +235,6 @@ ApiRequest.ResponseError = function (response) {
 }
 ApiRequest.ResponseError.prototype.toString = function () {
   return JSON.stringify(this.data, null, 2);
-}
-
-module.exports.getTermsOfService = function getTermsOfService () {
-  return request(this.getPath('/directory'))
-    .then(function (response) {
-      return response.json();
-    })
-    .then(function (json) {
-      return json.meta.termsOfService;
-    });
 }
 
 module.exports.ApiRequest = ApiRequest;
