@@ -13,10 +13,15 @@ module.exports = {
       retries: this.params.retries,
     };
     const promises = [];
+    let isValid = true;
 
     for (const domain in challenges) {
       if (challenges[domain].status === STATUS.PENDING) {
         promises.push(api.validationRequest(challenges[domain].url).then(parseResponse));
+      } else {
+        if (challenges[domain].status !== STATUS.VALID) {
+          isValid = fasle;
+        }
       }
     }
 
@@ -34,6 +39,8 @@ module.exports = {
         .catch(function (error) {
           queue.trigger('error', error);
         });
+    } else if (isValid) {
+      queue.trigger('timer');
     }
   },
   timer: function () {
