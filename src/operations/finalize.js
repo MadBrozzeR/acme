@@ -15,16 +15,16 @@ module.exports = {
     order.getStatus()
       .then(function (status) {
         switch (status) {
+          case STATUS.INVALID:
+            throw new Error('The certificate will not be issued. Consider this order process abandoned.');
+          case STATUS.PENDING:
+            throw new Error('The server does not believe that the client has fulfilled the requirements.  Check the "authorizations" array for entries that are still pending.');
           case STATUS.READY:
             queue.trigger('keys');
             break;
           case STATUS.VALID:
             queue.trigger('success');
             break;
-          case STATUS.INVALID:
-            throw new Error('The certificate will not be issued. Consider this order process abandoned.');
-          case STATUS.PENDING:
-            throw new Error('The server does not believe that the client has fulfilled the requirements.  Check the "authorizations" array for entries that are still pending.');
         }
       })
       .catch(function (error) {

@@ -6,6 +6,28 @@ module.exports = {
   name: 'validate',
 
   init: function () {
+    const { order } = this.params;
+    const { queue } = this;
+
+    order.getStatus().then(function (status) {
+      switch (status) {
+        case STATUS.INVALID:
+          throw new Error('The certificate will not be issued. Consider this order process abandoned.');
+          break;
+        case STATUS.PENDING:
+          queue.trigger('request');
+          break;
+        default:
+          queue.trigger('success');
+          break;
+      }
+    })
+      .catch(function (error) {
+        queue.trigger('error', error);
+      });
+  },
+
+  request: function () {
     const challenges = this.params.challenges;
     const api = this.params.order.account.api;
     const queue = this.queue;
@@ -13,15 +35,10 @@ module.exports = {
       retries: this.params.retries,
     };
     const promises = [];
-    let isValid = true;
 
     for (const domain in challenges) {
       if (challenges[domain].status === STATUS.PENDING) {
         promises.push(api.validationRequest(challenges[domain].url).then(parseResponse));
-      } else {
-        if (challenges[domain].status !== STATUS.VALID) {
-          isValid = fasle;
-        }
       }
     }
 
@@ -72,7 +89,7 @@ module.exports = {
               break;
             case STATUS.VALID:
             case STATUS.READY:
-              queue.trigger('success', response);
+              queue.trigger('prepare', response);
               break;
           }
         } else {
@@ -84,9 +101,12 @@ module.exports = {
       });
   },
   error: handleError,
-  success: function (response) {
+  prepare: function (response) {
     updateOrderFields(this.params.order, response);
-    this.params.resolve(response.data);
+    this.queue.trigger('success');
+  },
+  success: function () {
+    this.params.resolve(this.params.order);
     this.queue.next();
   }
 }
