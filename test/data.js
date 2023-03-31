@@ -9,3 +9,9 @@ module.exports.privateKey = [
   'zAkmtBlPsk6InUsepCYFp5CLJJ22h6n5QUtp3yDdnb4=',
   '-----END RSA PRIVATE KEY-----'
 ].join('\n');
+
+module.exports.CERTIFICATE = [
+  '-----BEGIN CERTIFICATE-----',
+  'aaaaaaaaaaaa',
+  '-----END CERTIFICATE-----'
+].join('\n');

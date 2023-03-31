@@ -1,6 +1,6 @@
 const { Account } = require('../index.js');
-const { privateKey } = require('./data.js');
-const { mockData } = require('./mocks/index.js');
+const { privateKey, CERTIFICATE } = require('./data.js');
+const { mockData, mockDataOrderReady } = require('./mocks/index.js');
 const { getRequest, checkRequestData, checkRequest, checkFields } = require('./utils.js');
 
 function createOrder(domains = ['example.com', 'sub.example.com', 'sub1.example.com'], params) {
@@ -9,8 +9,6 @@ function createOrder(domains = ['example.com', 'sub.example.com', 'sub1.example.
       return account.createOrder(domains, params);
     });
 }
-
-const CERTIFICATE = '-----BEGIN CERTIFICATE-----\naaaaaaaaaaaa\n-----END CERTIFICATE-----';
 
 module.exports = {
   'should create new order with one domain': function (resolve, reject) {
@@ -149,9 +147,22 @@ module.exports = {
             return order.validate(challenges);
           })
           .then(function (result) {
-            const request = getRequest(mocks.collect(), '/order/995569897/168511849427');
+            const requests = mocks.collect();
+            const validationRequests = [
+              getRequest(requests, '/chall/208626448057/vY7eRg'),
+              getRequest(requests, '/chall/208626448067/vY7eRg'),
+              getRequest(requests, '/chall/208626448077/vY7eRg'),
+            ];
+            const checkRequest = getRequest(requests, '/order/995569897/168511849427');
 
-            if (!request) {
+            if (validationRequests[0]) {
+              throw 'Wrong request was sent. "valid" status should not be targeted.';
+            }
+
+            checkRequestData(suit, validationRequests[1], { payload: 'e30' }, '[chall 1]');
+            checkRequestData(suit, validationRequests[2], { payload: 'e30' }, '[chall 2]');
+
+            if (!checkRequest) {
               throw 'Request has not been sent';
             }
 
@@ -294,6 +305,38 @@ module.exports = {
           CERTIFICATE,
           'Wrong certificate data'
         );
+      })
+      .then(resolve)
+      .catch(reject);
+  },
+  'should skip validation on status VALID': function (resolve, reject) {
+    const { data: { mocks }, suit } = this;
+
+    mocks.attach(mockDataOrderReady);
+
+    createOrder()
+      .then(function (order) {
+        return order.getAllChallenges()
+          .then(function (challenges) {
+            return order.validate(challenges);
+          });
+      })
+      .then(function () {
+        const requests = mocks.collect();
+        const validationRequests = [
+          getRequest(requests, '/chall/208626448057/vY7eRg'),
+          getRequest(requests, '/chall/208626448067/vY7eRg'),
+          getRequest(requests, '/chall/208626448077/vY7eRg'),
+        ];
+        const checkRequest = getRequest(requests, '/order/995569897/168511849427');
+
+        if (validationRequests[0] || validationRequests[1] || validationRequests[2]) {
+          throw 'Unnecessary challenge response was sent';
+        }
+
+        if (checkRequest) {
+          throw 'Unnecessary check request was sent';
+        }
       })
       .then(resolve)
       .catch(reject);

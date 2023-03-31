@@ -1,4 +1,4 @@
-module.exports.newOrder = {
+module.exports.orderPending = {
   status: 201,
   headers: {
     'server': 'nginx',
@@ -117,7 +117,7 @@ module.exports.authorization = function ({
   };
 };
 
-module.exports.orderInfo = {
+module.exports.orderReady = {
   status: 200,
   headers: {
     'server': 'nginx',
@@ -126,6 +126,7 @@ module.exports.orderInfo = {
     'connection': 'close',
     'cache-control': 'public, max-age=0, no-cache',
     'link': '<http://localhost:5084/directory>;rel=\'index\'',
+    'location': 'http://localhost:5084/order/995569897/168511849427',
     'x-frame-options': 'DENY',
     'strict-transport-security': 'max-age=604800'
   },
@@ -155,7 +156,7 @@ module.exports.orderInfo = {
   }
 };
 
-module.exports.finalize = {
+module.exports.orderValid = {
   status: 200,
   headers: {
     'server': 'nginx',
