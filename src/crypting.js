@@ -105,13 +105,13 @@ module.exports.getJWSAuth = function getJWSAuth (privateKey) {
 
   return {
     e: base64url(keyData.exponent),
+    kty: 'RSA',
     n: base64url(keyData.modulus),
-    kty: 'RSA'
   };
 }
 
 module.exports.getThumb = function getThumb (auth) {
-  return base64url(hash('sha256', JSON.stringify(auth)));
+  return base64url(hash('SHA256', JSON.stringify(auth)));
 }
 
 function sign (data, key) {
