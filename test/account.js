@@ -36,9 +36,9 @@ module.exports = {
         const requests = mocks.collect();
 
         const data = JSON.parse(requests[2].data);
-        suit.equals(data.protected, 'eyJhbGciOiJSUzI1NiIsIm5vbmNlIjoiQTVGRU1qbElOaUhGODBxeHV5VUNNVFZaT0JnNmRmTTZzWHNkTTI2anNZeGxyc2siLCJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvc3ViL25ldy1hY2N0IiwiandrIjp7ImUiOiJBUUFCIiwibiI6InJWR0pLRHY0VGF6YTNJSzJQX3JjaGVUMFh5ZFBqajQ4RTdLZ0h5dF9MTzJSUllEX09FQ05qTlU3NE1lWDl4eHdEMzNvNXBibkhFUFBZdDVmWVBweWlRIiwia3R5IjoiUlNBIn19', 'Wrong protected field data');
+        suit.equals(data.protected, 'eyJhbGciOiJSUzI1NiIsIm5vbmNlIjoiQTVGRU1qbElOaUhGODBxeHV5VUNNVFZaT0JnNmRmTTZzWHNkTTI2anNZeGxyc2siLCJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvc3ViL25ldy1hY2N0IiwiandrIjp7ImUiOiJBUUFCIiwia3R5IjoiUlNBIiwibiI6InJWR0pLRHY0VGF6YTNJSzJQX3JjaGVUMFh5ZFBqajQ4RTdLZ0h5dF9MTzJSUllEX09FQ05qTlU3NE1lWDl4eHdEMzNvNXBibkhFUFBZdDVmWVBweWlRIn19', 'Wrong protected field data');
         suit.equals(data.payload, 'eyJ0ZXJtc09mU2VydmljZUFncmVlZCI6dHJ1ZX0', 'Wrong payload field data');
-        suit.equals(data.signature, 'gN9C8tE3gcC87SHC5lpYEtdT-D9HB-splWJVlGtK99Lyoq9rcUiBvhbLkuF4iKJk0zbLkTVLjQZqTQE23-93fw', 'Wrong signature field data');
+        suit.equals(data.signature, 'JsLWaz0RxHyPqKS5zqBl64Deh8AvlgDRAWaInQ6I7SvDiLh53oQMOFmol_oWfwg7SCarWym3L2JdzCw6YKPLwA', 'Wrong signature field data');
       })
       .then(resolve)
       .catch(reject);
@@ -52,7 +52,7 @@ module.exports = {
       .then(function (account) {
         const thumbprint = account.getThumbprint();
 
-        suit.equals(thumbprint, 'd7GAEzos3M9j4MWFo68aL9z-TiAOMtaGzr8YElpROTc', 'Wrong thumbprint');
+        suit.equals(thumbprint, 'cB5AMRLdLHedcbL7OOR0OlWKCg11yX08S5-ZkEv93sA', 'Wrong thumbprint');
       })
       .then(resolve)
       .catch(reject)

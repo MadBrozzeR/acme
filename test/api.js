@@ -75,9 +75,9 @@ module.exports = {
 
         const requestData = JSON.parse(requests[2].data);
 
-        equals(requestData.protected, 'eyJhbGciOiJSUzI1NiIsIm5vbmNlIjoiQTVGRU1qbElOaUhGODBxeHV5VUNNVFZaT0JnNmRmTTZzWHNkTTI2anNZeGxyc2siLCJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvbmV3LW9yZGVyIiwiandrIjp7ImUiOiJBUUFCIiwibiI6InJWR0pLRHY0VGF6YTNJSzJQX3JjaGVUMFh5ZFBqajQ4RTdLZ0h5dF9MTzJSUllEX09FQ05qTlU3NE1lWDl4eHdEMzNvNXBibkhFUFBZdDVmWVBweWlRIiwia3R5IjoiUlNBIn19', 'Wrong protected field data');
+        equals(requestData.protected, 'eyJhbGciOiJSUzI1NiIsIm5vbmNlIjoiQTVGRU1qbElOaUhGODBxeHV5VUNNVFZaT0JnNmRmTTZzWHNkTTI2anNZeGxyc2siLCJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvbmV3LW9yZGVyIiwiandrIjp7ImUiOiJBUUFCIiwia3R5IjoiUlNBIiwibiI6InJWR0pLRHY0VGF6YTNJSzJQX3JjaGVUMFh5ZFBqajQ4RTdLZ0h5dF9MTzJSUllEX09FQ05qTlU3NE1lWDl4eHdEMzNvNXBibkhFUFBZdDVmWVBweWlRIn19', 'Wrong protected field data');
         equals(requestData.payload, 'eyJkYXRhVG9TZW5kIjoidGVzdCJ9', 'Wrong payload field data');
-        equals(requestData.signature, 'lfJKl7FCfmmYyH1sy15DF26yLl0aQ5Z4lzq6YIaRf6dn57JHnZxbauCLBoF1zqXNY_gLtBHV8W7AoUUnX6vW9Q', 'Wrong signature field data');
+        equals(requestData.signature, 'NgZS8B34ayhViAgFN0vh5ncL09vw2dMGHnArzLSrNnEVfczxbp4sKKE2OhFQ2r0twfV2laLlgwTWNlkZQaKHlQ', 'Wrong signature field data');
 
         return apiRequest.request('http://localhost:5084/second-request');
       })
@@ -112,9 +112,9 @@ module.exports = {
 
         const requestData = JSON.parse(requests[2].data);
 
-        equals(requestData.protected, 'eyJhbGciOiJSUzI1NiIsIm5vbmNlIjoiQTVGRU1qbElOaUhGODBxeHV5VUNNVFZaT0JnNmRmTTZzWHNkTTI2anNZeGxyc2siLCJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvc3ViL25ldy1hY2N0IiwiandrIjp7ImUiOiJBUUFCIiwibiI6InJWR0pLRHY0VGF6YTNJSzJQX3JjaGVUMFh5ZFBqajQ4RTdLZ0h5dF9MTzJSUllEX09FQ05qTlU3NE1lWDl4eHdEMzNvNXBibkhFUFBZdDVmWVBweWlRIiwia3R5IjoiUlNBIn19', 'Wrong protected field data');
+        equals(requestData.protected, 'eyJhbGciOiJSUzI1NiIsIm5vbmNlIjoiQTVGRU1qbElOaUhGODBxeHV5VUNNVFZaT0JnNmRmTTZzWHNkTTI2anNZeGxyc2siLCJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjUwODQvc3ViL25ldy1hY2N0IiwiandrIjp7ImUiOiJBUUFCIiwia3R5IjoiUlNBIiwibiI6InJWR0pLRHY0VGF6YTNJSzJQX3JjaGVUMFh5ZFBqajQ4RTdLZ0h5dF9MTzJSUllEX09FQ05qTlU3NE1lWDl4eHdEMzNvNXBibkhFUFBZdDVmWVBweWlRIn19', 'Wrong protected field data');
         equals(requestData.payload, 'eyJ0ZXJtc09mU2VydmljZUFncmVlZCI6dHJ1ZSwiY29udGFjdCI6WyJtYWlsdG86c29tZW9uZUBleGFtcGxlLmNvbSJdfQ', 'Wrong payload field data');
-        equals(requestData.signature, 'ebRVgYDOAkZAZaYLsJSVZL-BkusrX82SJd0qznKE_5xiW5BskycwX7fNDYSHI-1w9LAm1LWef72Rlrtau82Yaw', 'Wrong signature field data');
+        equals(requestData.signature, 'Qw67FFPrnmhhRl0ty-DD7HAK49NMd4-VvcyJop0MU1y0coWJ7IjO_0NP85VVcx37oT8wBnOra7B-Aqhq3KF2gg', 'Wrong signature field data');
       })
       .then(resolve)
       .catch(reject);

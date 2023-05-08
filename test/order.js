@@ -89,7 +89,7 @@ module.exports = {
           identifier: 'example.com',
           url: 'http://localhost:5084/chall/208626448057/RQl2-A',
           token: 'gaW1F_vpIqGuNgNiArezA3Lk334Bdk4xzwyyKqYuClE',
-          key: 'gaW1F_vpIqGuNgNiArezA3Lk334Bdk4xzwyyKqYuClE.d7GAEzos3M9j4MWFo68aL9z-TiAOMtaGzr8YElpROTc',
+          key: 'gaW1F_vpIqGuNgNiArezA3Lk334Bdk4xzwyyKqYuClE.cB5AMRLdLHedcbL7OOR0OlWKCg11yX08S5-ZkEv93sA',
         });
         checkFields(suit, result[1], {
           type: 'http-01',
@@ -98,7 +98,7 @@ module.exports = {
           status: 'pending',
           url: 'http://localhost:5084/chall/208626448067/vY7eRg',
           token: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s',
-          key: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s.d7GAEzos3M9j4MWFo68aL9z-TiAOMtaGzr8YElpROTc',
+          key: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s.cB5AMRLdLHedcbL7OOR0OlWKCg11yX08S5-ZkEv93sA',
           validationRecord: null
         });
         checkFields(suit, result[2], {
@@ -107,7 +107,7 @@ module.exports = {
           status: 'pending',
           url: 'http://localhost:5084/chall/208626448077/vY7eRg',
           token: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s',
-          key: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s.d7GAEzos3M9j4MWFo68aL9z-TiAOMtaGzr8YElpROTc',
+          key: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s.cB5AMRLdLHedcbL7OOR0OlWKCg11yX08S5-ZkEv93sA',
           validationRecord: null
         });
       })
@@ -252,21 +252,21 @@ module.exports = {
               identifier: 'example.com',
               url: 'http://localhost:5084/chall/208626448057/RQl2-A',
               token: 'gaW1F_vpIqGuNgNiArezA3Lk334Bdk4xzwyyKqYuClE',
-              key: 'gaW1F_vpIqGuNgNiArezA3Lk334Bdk4xzwyyKqYuClE.d7GAEzos3M9j4MWFo68aL9z-TiAOMtaGzr8YElpROTc',
+              key: 'gaW1F_vpIqGuNgNiArezA3Lk334Bdk4xzwyyKqYuClE.cB5AMRLdLHedcbL7OOR0OlWKCg11yX08S5-ZkEv93sA',
             });
             checkFields(suit, challenges[1], {
               identifier: 'sub.example.com',
               status: 'pending',
               url: 'http://localhost:5084/chall/208626448067/vY7eRg',
               token: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s',
-              key: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s.d7GAEzos3M9j4MWFo68aL9z-TiAOMtaGzr8YElpROTc',
+              key: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s.cB5AMRLdLHedcbL7OOR0OlWKCg11yX08S5-ZkEv93sA',
             });
             checkFields(suit, challenges[2], {
               identifier: 'sub1.example.com',
               status: 'pending',
               url: 'http://localhost:5084/chall/208626448077/vY7eRg',
               token: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s',
-              key: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s.d7GAEzos3M9j4MWFo68aL9z-TiAOMtaGzr8YElpROTc',
+              key: '36Dv8UY1YYlm85h7QQNWRBq0PvmDKQ9nvnVs_5HOq_s.cB5AMRLdLHedcbL7OOR0OlWKCg11yX08S5-ZkEv93sA',
             });
 
             return Promise.resolve();
